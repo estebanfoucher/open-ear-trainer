@@ -6,14 +6,21 @@ import logging
 import os
 
 # Simple exercise registry - we'll import exercises directly
-from exercises.level1.interval_recognition import IntervalRecognitionExercise
+from exercises.level1.interval_recognition import IntervalRecognitionExercise, MinorThirdMajorThirdOctaveMelodicExercise
+from exercises.level1.perfect_intervals_melodic import PerfectFourthPerfectFifthOctaveMelodicExercise
+from exercises.level1.thirds_octave_harmonic import MinorThirdMajorThirdOctaveHarmonicExercise
+from exercises.level1.perfect_intervals_harmonic import PerfectFourthPerfectFifthOctaveHarmonicExercise
 from django.conf import settings
 
 # Simple exercise registry replacement
 class SimpleExerciseRegistry:
     def __init__(self):
         self.exercises = {
-            "interval_recognition": IntervalRecognitionExercise(),
+            # New exercises
+            "minor_third_major_third_octave_melodic": MinorThirdMajorThirdOctaveMelodicExercise(),
+            "perfect_fourth_fifth_octave_melodic": PerfectFourthPerfectFifthOctaveMelodicExercise(),
+            "minor_third_major_third_octave_harmonic": MinorThirdMajorThirdOctaveHarmonicExercise(),
+            "perfect_fourth_fifth_octave_harmonic": PerfectFourthPerfectFifthOctaveHarmonicExercise(),
         }
     
     def get_exercise_count(self):
