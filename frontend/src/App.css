@@ -1,0 +1,29 @@
+.App {
+  text-align: center;
+}
+
+.exercise-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.exercise-list .card {
+  text-align: left;
+}
+
+.exercise-list h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.exercise-list p {
+  margin: 8px 0;
+  color: #666;
+}
+
+.exercise-list .btn {
+  margin-top: 16px;
+  width: 100%;
+}
