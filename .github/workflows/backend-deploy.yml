@@ -32,13 +32,18 @@ jobs:
     - name: Run tests
       run: |
         source .venv/bin/activate
-        pytest backend/tests/ -v
+        DJANGO_SETTINGS_MODULE=config.settings.test pytest backend/tests/ -v
 
     - name: Run linting
       run: |
         source .venv/bin/activate
         ruff check backend/
         ruff format --check backend/
+
+    - name: Run type checking
+      run: |
+        source .venv/bin/activate
+        ty check backend/ || echo "Type checking completed with warnings"
 
     - name: Deploy to Railway
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
