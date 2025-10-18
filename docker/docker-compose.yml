@@ -6,13 +6,14 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - DJANGO_SETTINGS_MODULE=config.settings.development
       - SECRET_KEY=${SECRET_KEY:-django-insecure-change-me-in-production}
-      - DEBUG=${DEBUG:-False}
+      - DEBUG=${DEBUG:-True}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - SOUNDFONT_PATH=/app/soundfonts/School_Piano_2024.sf2
-      - AUDIO_CACHE_ENABLED=${AUDIO_CACHE_ENABLED:-True}
-      - AUDIO_CACHE_MAX_SIZE=${AUDIO_CACHE_MAX_SIZE:-1000}
+      - AUDIO_CACHE_ENABLED=${AUDIO_CACHE_ENABLED:-False}
+      - AUDIO_CACHE_MAX_SIZE=${AUDIO_CACHE_MAX_SIZE:-100}
+      - DATABASE_URL=sqlite:///db.sqlite3
     volumes:
       - ../media:/app/media
       - ../soundfonts:/app/soundfonts

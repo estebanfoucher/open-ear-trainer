@@ -23,15 +23,17 @@ FROM python:3.11-slim AS backend
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=config.settings.production
+ENV DOCKER=true
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+# Install system dependencies with retry and fix-missing
+RUN apt-get update --fix-missing \
+    && apt-get install -y --no-install-recommends --fix-missing \
         build-essential \
         libfluidsynth-dev \
         fluid-soundfont-gm \
         curl \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    || (apt-get update --fix-missing && apt-get install -y --no-install-recommends --fix-missing build-essential libfluidsynth-dev fluid-soundfont-gm curl && rm -rf /var/lib/apt/lists/*)
 
 # Set working directory
 WORKDIR /app
