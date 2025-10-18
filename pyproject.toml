@@ -1,0 +1,161 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend"]
+
+[project]
+name = "open-ear-trainer"
+version = "0.1.0"
+description = "A scalable ear training web application for musicians"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Esteban Foucher", email = "esteban@example.com"},
+]
+keywords = ["music", "ear-training", "education", "django", "react"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Django",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Education",
+]
+
+dependencies = [
+    "django>=4.2,<5.0",
+    "djangorestframework>=3.14.0",
+    "django-cors-headers>=4.0.0",
+    "mingus>=0.6.0",
+    "pyfluidsynth>=1.3.0",
+    "python-decouple>=3.8",
+    "pillow>=10.0.0",
+    "psycopg2-binary>=2.9.0",
+    "ty>=0.0.1a23",
+    "pre-commit>=4.3.0",
+    "pytest-django>=4.11.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-django>=4.5.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.0.0",
+    "ty>=0.0.1a23",
+    "django-stubs>=4.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/estebanfoucher/open-ear-trainer"
+Repository = "https://github.com/estebanfoucher/open-ear-trainer"
+Issues = "https://github.com/estebanfoucher/open-ear-trainer/issues"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "ARG001", # unused-function-args
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "PTH", # flake8-use-pathlib
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    # Django-specific exceptions
+    "F403",  # star imports (normal in Django settings)
+    "F405",  # undefined names from star imports (normal in Django settings)
+    # Path handling exceptions (keep os.path for compatibility)
+    "PTH100", # os.path.abspath
+    "PTH103", # os.makedirs
+    "PTH110", # os.path.exists
+    "PTH117", # os.path.isabs
+    "PTH118", # os.path.join
+    "PTH120", # os.path.dirname
+    "PTH123", # builtin open
+    # Code style exceptions
+    "SIM116", # if-else instead of dict (readability preference)
+    "SIM105", # contextlib.suppress (deployment script exception handling)
+    "B904",   # raise from err (deployment script error handling)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**/*.py" = ["ARG001", "S101"]
+# Django settings files - star imports are normal
+"backend/config/settings/*.py" = ["F403", "F405"]
+# API views - imports after code is sometimes necessary
+"backend/api_app/views.py" = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["backend", "exercises", "music", "audio", "api"]
+
+[tool.pytest.ini_options]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+
+[tool.coverage.run]
+source = ["backend"]
+omit = [
+    "*/migrations/*",
+    "*/venv/*",
+    "*/tests/*",
+    "*/test_*",
+    "manage.py",
+    "*/settings/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.ty]
+# Configuration for Ty type checker
+# Disable specific rules for Django compatibility
+
+[tool.ty.rules]
+unresolved-import = "ignore"  # Ignore import resolution errors
+invalid-assignment = "ignore" # Ignore assignment errors in Django settings
+non-subscriptable = "ignore"  # Ignore subscript errors in Django settings
+possibly-missing-implicit-call = "ignore" # Ignore implicit call warnings

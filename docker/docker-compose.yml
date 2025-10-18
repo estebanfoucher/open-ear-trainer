@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-me-in-production}
+      - DEBUG=${DEBUG:-True}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - SOUNDFONT_PATH=/app/soundfonts/School_Piano_2024.sf2
+      - AUDIO_CACHE_ENABLED=${AUDIO_CACHE_ENABLED:-False}
+      - AUDIO_CACHE_MAX_SIZE=${AUDIO_CACHE_MAX_SIZE:-100}
+      - DATABASE_URL=sqlite:///db.sqlite3
+    volumes:
+      - ../media:/app/media
+      - ../soundfonts:/app/soundfonts
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/exercises/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../staticfiles:/var/www/static:ro
+      - ../frontend/build:/var/www/frontend:ro
+      - ../media:/var/www/media:ro
+    depends_on:
+      - web
+    restart: unless-stopped

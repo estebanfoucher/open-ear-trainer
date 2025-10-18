@@ -1,0 +1,37 @@
+# Pre-commit hooks configuration
+repos:
+  # Ruff for Python linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      # Run the formatter
+      - id: ruff-format
+
+  # Ty for type checking (using local installation)
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: ./scripts/ty-check.sh
+        language: system
+        types: [python]
+        verbose: true
+
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-json
+
+# Configuration
+default_stages: [pre-commit]
+fail_fast: false
