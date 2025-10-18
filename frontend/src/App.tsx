@@ -57,7 +57,8 @@ const App: React.FC = () => {
   const fetchExercises = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/exercises/');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/exercises/`);
       setExercises(response.data);
     } catch (err) {
       setError('Failed to load exercises');
@@ -74,7 +75,8 @@ const App: React.FC = () => {
       setResult(null);
       setSelectedAnswer('');
 
-      const response = await axios.get(`/api/exercises/${exerciseId}/generate/?question_number=${questionNumber}`);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/exercises/${exerciseId}/generate/?question_number=${questionNumber}`);
       setExerciseData(response.data);
 
       // Auto-play the audio when question loads

@@ -21,16 +21,28 @@ SECURE_HSTS_PRELOAD = True
 # CSRF_COOKIE_SECURE = True
 
 # Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="open_ear_trainer"),
-        "USER": config("DB_USER", default="postgres"),
-        "PASSWORD": config("DB_PASSWORD", default=""),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+DATABASE_URL = config("DATABASE_URL", default="")
+if DATABASE_URL and DATABASE_URL.startswith("sqlite"):
+    # Use SQLite if DATABASE_URL is provided and points to SQLite
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+elif DATABASE_URL and DATABASE_URL.startswith("postgres"):
+    # Use PostgreSQL if DATABASE_URL is provided and points to PostgreSQL
+    import dj_database_url
+
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+else:
+    # Fallback to SQLite if no proper DATABASE_URL is provided
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Static files
 STATIC_ROOT = BASE_DIR.parent / "staticfiles"
@@ -41,8 +53,11 @@ MEDIA_ROOT = BASE_DIR.parent / "media"
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
-    default="https://your-domain.com,https://www.your-domain.com",
+    default="http://localhost:3000,http://127.0.0.1:3000,https://estebanfoucher.github.io",
 ).split(",")
+
+# Allow all origins for development (be more restrictive in production)
+CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", default=True, cast=bool)
 
 # Logging
 LOGGING = {

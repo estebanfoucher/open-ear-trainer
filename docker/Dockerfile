@@ -1,21 +1,3 @@
-# Multi-stage build for production deployment
-FROM node:18-alpine AS frontend-build
-
-# Set working directory
-WORKDIR /app/frontend
-
-# Copy package files
-COPY ../frontend/package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy frontend source
-COPY ../frontend/ ./
-
-# Build frontend
-RUN npm run build
-
 # Python backend stage
 FROM python:3.11-slim AS backend
 
@@ -42,8 +24,8 @@ WORKDIR /app
 RUN pip install uv
 
 # Copy Python dependencies and README
-COPY ../pyproject.toml ./
-COPY ../README.md ./
+COPY pyproject.toml ./
+COPY README.md ./
 
 # Install Python dependencies
 RUN uv venv && \
@@ -51,13 +33,12 @@ RUN uv venv && \
     uv pip install -e ".[dev]"
 
 # Copy backend source
-COPY ../backend/ ./backend/
+COPY backend/ ./backend/
 
 # Copy soundfonts
-COPY ../soundfonts/ ./soundfonts/
+COPY soundfonts/ ./soundfonts/
 
-# Copy built frontend from previous stage
-COPY --from=frontend-build /app/frontend/build ./frontend/build
+# Frontend is deployed separately to GitHub Pages
 
 # Create media and logs directories
 RUN mkdir -p media/audio logs
@@ -67,12 +48,12 @@ RUN cd backend && \
     . ../.venv/bin/activate && \
     DJANGO_SETTINGS_MODULE=config.settings.development python manage.py collectstatic --noinput
 
-# Expose port
-EXPOSE 8000
+# Expose port (Railway will inject PORT env var)
+EXPOSE $PORT
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/api/exercises/ || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health/ || exit 1
 
 # Run the application
-CMD ["sh", "-c", "cd backend && . ../.venv/bin/activate && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "cd backend && . ../.venv/bin/activate && python manage.py migrate && python manage.py runserver 0.0.0.0:${PORT:-8000}"]

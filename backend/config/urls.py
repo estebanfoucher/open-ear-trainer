@@ -5,9 +5,18 @@ URL configuration for config project.
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path
 
+
+def health(request):
+    """Health check endpoint for Railway deployment."""
+    # Simple health check that doesn't require database connection
+    return HttpResponse("healthy", status=200)
+
+
 urlpatterns = [
+    path("health/", health),
     path("admin/", admin.site.urls),
     path("api/", include("api_app.urls")),
 ]
