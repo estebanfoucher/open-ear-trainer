@@ -10,6 +10,16 @@ repos:
       # Run the formatter
       - id: ruff-format
 
+  # Ty for type checking (using local installation)
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: ./scripts/ty-check.sh
+        language: system
+        types: [python]
+        verbose: true
+
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0

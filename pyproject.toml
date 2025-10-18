@@ -151,4 +151,10 @@ exclude_lines = [
 
 [tool.ty]
 # Configuration for Ty type checker
-# Keep minimal configuration for now
+# Disable specific rules for Django compatibility
+
+[tool.ty.rules]
+unresolved-import = "ignore"  # Ignore import resolution errors
+invalid-assignment = "ignore" # Ignore assignment errors in Django settings
+non-subscriptable = "ignore"  # Ignore subscript errors in Django settings
+possibly-missing-implicit-call = "ignore" # Ignore implicit call warnings
