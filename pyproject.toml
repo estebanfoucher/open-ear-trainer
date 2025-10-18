@@ -39,6 +39,7 @@ dependencies = [
     "psycopg2-binary>=2.9.0",
     "ty>=0.0.1a23",
     "pre-commit>=4.3.0",
+    "pytest-django>=4.11.1",
 ]
 
 [project.optional-dependencies]
@@ -108,7 +109,6 @@ ignore = [
 known-first-party = ["backend", "exercises", "music", "audio", "api"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -123,6 +123,7 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
 ]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
 
 [tool.coverage.run]
 source = ["backend"]

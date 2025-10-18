@@ -53,7 +53,7 @@ type-check: ## Run type checking with ty
 
 # Testing
 test: ## Run all tests
-	.venv/bin/activate && pytest backend/tests/ -v
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/ -v
 
 test-unit: ## Run unit tests only
 	.venv/bin/activate && pytest backend/tests/ -v -m "not integration"

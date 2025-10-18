@@ -27,7 +27,7 @@ class APITestCase(APITestCase):
 
     def test_exercises_list_endpoint(self):
         """Test that exercises API endpoint is accessible."""
-        url = reverse("exercise-list")
+        url = reverse("api:exercise-list")
         response = self.client.get(url)
         # Should return 200 even if no exercises exist
         self.assertEqual(response.status_code, status.HTTP_200_OK)
