@@ -6,11 +6,21 @@ import logging
 import os
 
 # Simple exercise registry - we'll import exercises directly
-from exercises.level1.interval_recognition import IntervalRecognitionExercise, MinorThirdMajorThirdOctaveMelodicExercise
-from exercises.level1.perfect_intervals_melodic import PerfectFourthPerfectFifthOctaveMelodicExercise
-from exercises.level1.thirds_octave_harmonic import MinorThirdMajorThirdOctaveHarmonicExercise
-from exercises.level1.perfect_intervals_harmonic import PerfectFourthPerfectFifthOctaveHarmonicExercise
+from exercises.level1.interval_recognition import (
+    IntervalRecognitionExercise,
+    MinorThirdMajorThirdOctaveMelodicExercise,
+)
+from exercises.level1.perfect_intervals_melodic import (
+    PerfectFourthPerfectFifthOctaveMelodicExercise,
+)
+from exercises.level1.thirds_octave_harmonic import (
+    MinorThirdMajorThirdOctaveHarmonicExercise,
+)
+from exercises.level1.perfect_intervals_harmonic import (
+    PerfectFourthPerfectFifthOctaveHarmonicExercise,
+)
 from django.conf import settings
+
 
 # Simple exercise registry replacement
 class SimpleExerciseRegistry:
@@ -22,20 +32,21 @@ class SimpleExerciseRegistry:
             "minor_third_major_third_octave_harmonic": MinorThirdMajorThirdOctaveHarmonicExercise(),
             "perfect_fourth_fifth_octave_harmonic": PerfectFourthPerfectFifthOctaveHarmonicExercise(),
         }
-    
+
     def get_exercise_count(self):
         return len(self.exercises)
-    
+
     def get_exercise_list(self):
         return [exercise.metadata for exercise in self.exercises.values()]
-    
+
     def get_exercise_metadata(self, exercise_id):
         if exercise_id in self.exercises:
             return self.exercises[exercise_id].metadata
         return None
-    
+
     def get_exercise(self, exercise_id):
         return self.exercises.get(exercise_id)
+
 
 exercise_registry = SimpleExerciseRegistry()
 from django.http import FileResponse

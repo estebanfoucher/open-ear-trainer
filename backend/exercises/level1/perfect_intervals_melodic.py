@@ -14,10 +14,10 @@ class PerfectFourthPerfectFifthOctaveMelodicExercise(BaseIntervalExercise):
     """
     Exercise for recognizing perfect fourth, perfect fifth, and octave intervals with melodic timing.
     """
-    
+
     def __init__(self):
         super().__init__(
             intervals=["perfect_fourth", "perfect_fifth", "octave"],
             exercise_type="perfect_fourth_fifth_octave",
-            timing="melodic"
+            timing="melodic",
         )

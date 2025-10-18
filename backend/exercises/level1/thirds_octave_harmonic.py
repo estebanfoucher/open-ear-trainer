@@ -13,10 +13,10 @@ class MinorThirdMajorThirdOctaveHarmonicExercise(BaseIntervalExercise):
     """
     Exercise for recognizing minor third, major third, and octave intervals with harmonic timing.
     """
-    
+
     def __init__(self):
         super().__init__(
             intervals=["minor_third", "major_third", "octave"],
             exercise_type="minor_third_major_third_octave",
-            timing="harmonic"
+            timing="harmonic",
         )

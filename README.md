@@ -1,88 +1,165 @@
 # Open Ear Trainer
 
-A scalable ear training web application for musicians built with Django and React.
+A scalable ear training web application for musicians built with Django and React. This application helps musicians develop their aural skills through interactive exercises with real-time audio generation.
 
-## Architecture
+## 🎵 Features
 
-This project implements a highly scalable, plugin-based architecture for progressive course development:
+- **Interactive Ear Training**: Progressive exercises for interval recognition
+- **Real-Time Audio Generation**: High-quality audio synthesis using FluidSynth and SoundFonts
+- **Scalable Architecture**: Plugin-based exercise system with auto-discovery
+- **Modern UI**: React frontend with TypeScript for optimal user experience
+- **Docker Support**: Complete containerization for easy deployment
+- **CI/CD Ready**: GitHub Actions workflows for automated deployment
 
-- **Backend**: Django + DRF with music theory using mingus and audio synthesis with FluidSynth
-- **Frontend**: React + TypeScript
-- **Exercise System**: Plugin-based with auto-discovery and metadata-driven configuration
-- **Course Progression**: Structured learning paths with prerequisites and adaptive recommendations
+## 🏗️ Project Structure
 
-## Current Status
+```
+open-ear-trainer/
+├── backend/                    # Django backend application
+│   ├── api_app/               # REST API endpoints
+│   ├── audio_app/             # Audio synthesis and generation
+│   ├── music_app/             # Music theory (scales, chords, notes)
+│   ├── exercises/             # Exercise system with plugins
+│   │   ├── base/              # Base exercise classes and metadata
+│   │   └── level1/            # Level 1 exercises (beginner)
+│   ├── config/                # Django configuration
+│   │   └── settings/          # Environment-specific settings
+│   └── tests/                 # Backend tests
+├── frontend/                  # React frontend application
+│   ├── src/                   # React components and logic
+│   ├── public/                # Static assets
+│   └── build/                 # Production build output
+├── docker/                    # Docker configuration
+│   ├── Dockerfile             # Production Docker image
+│   ├── docker-compose.yml     # Base compose configuration
+│   ├── docker-compose.dev.yml # Development environment
+│   ├── docker-compose.prod.yml# Production environment
+│   ├── nginx/                 # Nginx configurations
+│   └── scripts/               # Deployment and utility scripts
+├── media/                     # Generated audio files
+├── soundfonts/                # SoundFont files for audio synthesis
+├── .github/                   # GitHub Actions workflows
+├── deploy.py                  # CLI deployment script
+├── Makefile                   # Development commands
+└── pyproject.toml             # Python project configuration
+```
 
-✅ **Completed:**
-- Project structure and configuration (uv, ruff, pytest, pre-commit)
-- Django backend with REST API
-- Music theory module (scales, chords, progressions)
-- Exercise framework with metadata system
-- Dynamic exercise registry with auto-discovery
-- Audio synthesis with FluidSynth and SoundFont support
-- React frontend with TypeScript
-- Interval Recognition exercise with staggered timing
-- Real piano sounds using School_Piano_2024.sf2 SoundFont
+## 🛠️ Main Dependencies
 
-🚧 **In Progress:**
-- Course progression framework
-- Additional exercises and levels
+### Backend (Python)
+- **Django 4.2+**: Web framework
+- **Django REST Framework**: API development
+- **mingus**: Music theory library
+- **pyFluidSynth**: Audio synthesis
+- **python-decouple**: Environment configuration
+- **Pillow**: Image processing
+- **psycopg2-binary**: PostgreSQL adapter
 
-## Quick Start
+### Frontend (JavaScript/TypeScript)
+- **React 18**: UI framework
+- **TypeScript**: Type safety
+- **Axios**: HTTP client
+- **http-proxy-middleware**: Development proxy
+
+### Development Tools
+- **uv**: Python package management
+- **ruff**: Linting and formatting
+- **pytest**: Testing framework
+- **pre-commit**: Git hooks
+- **Docker & Docker Compose**: Containerization
+
+## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
+- Docker & Docker Compose
 - uv (Python package manager)
 
-### Setup
+### Development Setup
 
-1. **Clone and setup environment:**
+1. **Clone the repository:**
    ```bash
-   git clone <repository>
+   git clone <repository-url>
    cd open-ear-trainer
+   ```
+
+2. **Set up the environment:**
+   ```bash
    make setup
    ```
 
-2. **SoundFont is included:**
-   - School_Piano_2024.sf2 is already included in the `soundfonts/` directory
-   - No additional setup required for audio generation
-
-3. **Run development servers:**
+3. **Start the development environment:**
    ```bash
-   make run  # Runs both backend and frontend
-   # Or separately:
-   make run-backend   # Django server on :8000
-   make run-frontend  # React server on :3000
+   # Using Docker (recommended)
+   python deploy.py docker --env dev
+   
+   # Or using Make
+   make docker-run-dev
+   
+   # Or manually
+   make run
    ```
 
-### Development Commands
+4. **Access the application:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Documentation: http://localhost:8000/api/exercises/
+
+### Production Deployment
 
 ```bash
-make install     # Install dependencies
-make test        # Run tests
-make lint        # Run linting
-make format      # Format code
-make clean       # Clean cache files
+# Deploy with Docker
+python deploy.py docker --env prod
+
+# Deploy to GitHub Pages (frontend only)
+python deploy.py github-pages
+
+# Deploy to Railway (backend only)
+python deploy.py railway
+
+# Full deployment
+python deploy.py full
 ```
 
-## API Endpoints
+## 🎯 Available Commands
 
-- `GET /api/exercises/` - List all exercises
-- `GET /api/exercises/{id}/` - Get exercise details
-- `GET /api/exercises/{id}/generate/` - Generate new exercise instance
-- `POST /api/exercises/{id}/check/` - Check answer
-- `GET /api/audio/{filename}/` - Serve audio files
+### Development
+```bash
+make run              # Start both backend and frontend
+make run-backend      # Start Django server only
+make run-frontend     # Start React server only
+make test             # Run all tests
+make lint             # Run linting
+make format           # Format code
+make clean            # Clean cache files
+```
 
-## Exercise System
+### Docker
+```bash
+make docker-run-dev   # Development environment
+make docker-run-prod  # Production environment
+make docker-build     # Build Docker image
+make docker-clean     # Clean up Docker resources
+```
 
-The exercise system is designed for easy extensibility:
+### Deployment
+```bash
+make deploy           # Full deployment
+make deploy-docker    # Docker deployment
+make deploy-github    # GitHub Pages deployment
+make deploy-railway   # Railway deployment
+```
+
+## 🎼 Exercise System
+
+The application uses a plugin-based exercise system that automatically discovers and registers exercises:
 
 ### Adding a New Exercise
 
 1. Create a new file in `backend/exercises/level*/`
 2. Inherit from `BaseExercise` and implement required methods
-3. Define metadata with difficulty, prerequisites, learning objectives
+3. Define metadata with difficulty, prerequisites, and learning objectives
 4. The exercise is automatically discovered and available via API
 
 ### Example Exercise Structure
@@ -109,50 +186,240 @@ class MyExercise(BaseExercise):
         pass
 ```
 
-## Planned Exercises
+## 🎵 Audio System
 
-### Level 1 (Beginner)
-- ✅ Interval Recognition (octave, minor third, major third) with staggered timing
-- 🔄 Chord Quality (major vs minor)
-- 🔄 Note Identification in Major Scale
+The application generates high-quality audio using:
 
-### Level 2 (Intermediate)  
-- 🔄 Scale Degree Identification in Minor Scales
-- 🔄 Chord Progression Recognition
-- 🔄 Seventh Chord Qualities
+- **FluidSynth**: Real-time audio synthesis
+- **SoundFonts**: Professional instrument sounds
+- **mingus**: Music theory calculations
+- **Caching**: Optimized audio file generation
 
-### Level 3 (Advanced)
-- 🔄 Melodic Dictation
-- 🔄 Harmonic Dictation
-- 🔄 Modal Recognition
+### Supported Audio Formats
+- WAV files for exercises
+- Real-time audio generation
+- Configurable audio quality and timing
 
-## Technology Stack
+## 🔧 Configuration
 
-### Backend
-- **Django 5.2** - Web framework
-- **Django REST Framework** - API
-- **mingus** - Music theory
-- **pyFluidSynth** - Audio synthesis
-- **uv** - Package management
-- **ruff** - Linting and formatting
-- **pytest** - Testing
+### Environment Variables
 
-### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Axios** - HTTP client
-- **React Scripts** - Development and build tools
+Copy the appropriate environment file to `.env`:
 
-## License
+```bash
+# For development
+cp env.development.example .env
 
-MIT License - Free to use and modify.
+# For production
+cp env.example .env
+```
 
-## Contributing
+Then edit `.env` with your actual values:
 
-1. Fork the repository
-2. Create a feature branch
-3. Add your exercise or feature
-4. Write tests
-5. Submit a pull request
+```bash
+# Django Settings
+SECRET_KEY=your-secret-key-here
+DEBUG=True  # False for production
+ALLOWED_HOSTS=localhost,127.0.0.1
 
-The architecture is designed to make adding new exercises as simple as possible while maintaining code quality and scalability.
+# Audio Configuration
+SOUNDFONT_PATH=soundfonts/School_Piano_2024.sf2
+AUDIO_CACHE_ENABLED=True
+AUDIO_CACHE_MAX_SIZE=1000
+
+# Frontend
+REACT_APP_API_URL=http://localhost:8000
+```
+
+### Docker Configuration
+
+The project includes multiple Docker configurations:
+
+- **Development**: Hot reload, debug mode, simplified setup
+- **Production**: Optimized, secure, with Nginx reverse proxy
+- **Base**: Common configuration shared between environments
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+make test
+
+# Run specific test types
+make test-unit        # Unit tests only
+make test-integration # Integration tests only
+make test-coverage    # Tests with coverage report
+
+# Run linting
+make lint
+make format
+```
+
+## 📦 Deployment Options
+
+### Docker (Recommended)
+- Full-stack deployment with Nginx
+- Production-ready configuration
+- Easy scaling and management
+
+### GitHub Pages
+- Free frontend hosting
+- Automatic deployment on push
+- Perfect for demos and portfolios
+
+### Railway
+- Easy backend deployment
+- Automatic scaling
+- Built-in database support
+
+### Custom VPS
+- Full control over infrastructure
+- Custom domain support
+- Advanced configuration options
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+### 1. Fork and Clone
+```bash
+git clone https://github.com/your-username/open-ear-trainer.git
+cd open-ear-trainer
+```
+
+### 2. Set Up Development Environment
+```bash
+make setup
+pre-commit install
+pre-commit install --hook-type pre-push
+```
+
+### 3. Create a Feature Branch
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### 4. Make Your Changes
+- Add new exercises in `backend/exercises/`
+- Update frontend components in `frontend/src/`
+- Add tests for new functionality
+- Update documentation as needed
+
+### 5. Test Your Changes
+```bash
+make test
+make lint
+make format
+```
+
+### 6. Submit a Pull Request
+- Ensure all tests pass
+- Update documentation
+- Follow the existing code style
+- Provide a clear description of your changes
+
+### Development Guidelines
+
+- **Code Style**: Use `ruff` for formatting and linting
+- **Testing**: Write tests for new functionality
+- **Documentation**: Update README and inline comments
+- **Commits**: Use clear, descriptive commit messages
+- **Exercises**: Follow the plugin architecture pattern
+
+### Adding New Exercises
+
+1. **Choose the appropriate level** (`level1/`, `level2/`, etc.)
+2. **Inherit from `BaseExercise`**
+3. **Implement required methods**:
+   - `generate()`: Create exercise content
+   - `check_answer()`: Validate user responses
+4. **Define metadata** with difficulty, prerequisites, and objectives
+5. **Add tests** for your exercise
+6. **Update documentation**
+
+### Adding New Features
+
+1. **Backend**: Add new API endpoints in `api_app/`
+2. **Frontend**: Create React components in `frontend/src/`
+3. **Audio**: Extend the audio system in `audio_app/`
+4. **Music Theory**: Add new theory functions in `music_app/`
+
+## 📚 API Documentation
+
+### Exercise Endpoints
+
+- `GET /api/exercises/` - List all available exercises
+- `GET /api/exercises/{id}/` - Get exercise details
+- `GET /api/exercises/{id}/generate/` - Generate new exercise instance
+- `POST /api/exercises/{id}/check/` - Check user answer
+
+### Audio Endpoints
+
+- `GET /media/audio/{filename}/` - Serve generated audio files
+
+### Example API Usage
+
+```javascript
+// Get available exercises
+const exercises = await fetch('/api/exercises/').then(r => r.json());
+
+// Generate a new exercise
+const exercise = await fetch('/api/exercises/interval_recognition/generate/').then(r => r.json());
+
+// Check an answer
+const result = await fetch('/api/exercises/interval_recognition/check/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ answer: 'Perfect Fifth', context: exercise.context })
+}).then(r => r.json());
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Audio not playing**: Check that the proxy is configured correctly
+2. **Docker build fails**: Ensure all dependencies are properly installed
+3. **Tests failing**: Run `make clean` and try again
+4. **Frontend not connecting**: Verify the API URL configuration
+
+### Getting Help
+
+- Check the [Deployment Guide](DEPLOYMENT.md) for detailed setup instructions
+- Review the [GitHub Issues](https://github.com/estebanfoucher/open-ear-trainer/issues) for known problems
+- Create a new issue with detailed information about your problem
+
+## 📄 License
+
+MIT License - Free to use and modify. See [LICENSE](LICENSE) for details.
+
+## 🙏 Acknowledgments
+
+- **mingus**: Music theory library
+- **FluidSynth**: Audio synthesis engine
+- **School Piano SoundFont**: High-quality piano sounds
+- **Django & React**: Web frameworks
+- **Docker**: Containerization platform
+
+## 🎯 Roadmap
+
+### Planned Features
+- [ ] User authentication and progress tracking
+- [ ] Advanced exercises (chord progressions, modal recognition)
+- [ ] Mobile app support
+- [ ] Collaborative learning features
+- [ ] Custom exercise creation tools
+
+### Current Status
+- ✅ Basic interval recognition exercises
+- ✅ Audio generation and playback
+- ✅ Docker deployment
+- ✅ CI/CD pipeline
+- 🔄 User progress tracking (in development)
+- 🔄 Advanced exercises (planned)
+
+---
+
+**Happy ear training! 🎵**
+
+For more information, see the [Deployment Guide](DEPLOYMENT.md) or [Contributing Guidelines](CONTRIBUTING.md).

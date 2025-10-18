@@ -35,7 +35,7 @@ class ExerciseMetadata:
     audio_duration: int = 2  # Default audio duration in seconds
 
     # Configuration options
-    config_options: dict[str, Any] = None  # Exercise-specific configuration
+    config_options: dict[str, Any] | None = None  # Exercise-specific configuration
 
     def __post_init__(self):
         """Initialize default values."""
@@ -51,7 +51,7 @@ class ExerciseResult:
     user_answer: Any
     correct_answer: Any
     feedback: str
-    hints_used: list[str] = None
+    hints_used: list[str] | None = None
     time_taken: int | None = None  # Time in seconds
 
     def __post_init__(self):
@@ -73,11 +73,11 @@ class ExerciseData:
     target_audio: str | None = None  # URL to target audio
 
     # Answer options
-    options: list[Any] = None  # Available answer choices
+    options: list[Any] | None = None  # Available answer choices
     correct_answer: Any = None  # The correct answer
 
     # Additional context
-    context: dict[str, Any] = None  # Additional exercise-specific data
+    context: dict[str, Any] | None = None  # Additional exercise-specific data
 
     def __post_init__(self):
         """Initialize default values."""

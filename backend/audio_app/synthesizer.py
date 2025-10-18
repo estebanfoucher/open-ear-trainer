@@ -20,7 +20,7 @@ class AudioSynthesizer:
     using FluidSynth and SoundFont files.
     """
 
-    def __init__(self, soundfont_path: str = None):
+    def __init__(self, soundfont_path: str | None = None):
         """
         Initialize the audio synthesizer.
 
@@ -123,7 +123,7 @@ class AudioSynthesizer:
         return cache_path
 
     def synthesize_notes(
-        self, notes: list[str], duration: float = 2.0, output_path: str = None
+        self, notes: list[str], duration: float = 2.0, output_path: str | None = None
     ) -> str:
         """
         Synthesize audio from a list of notes.
@@ -165,7 +165,7 @@ class AudioSynthesizer:
         return output_path
 
     def synthesize_chord(
-        self, chord_notes: list[str], duration: float = 2.0, output_path: str = None
+        self, chord_notes: list[str], duration: float = 2.0, output_path: str | None = None
     ) -> str:
         """
         Synthesize audio from a chord.
@@ -206,7 +206,7 @@ class AudioSynthesizer:
         return output_path
 
     def synthesize_interval(
-        self, note1: str, note2: str, duration: float = 2.0, output_path: str = None
+        self, note1: str, note2: str, duration: float = 2.0, output_path: str | None = None
     ) -> str:
         """
         Synthesize audio from an interval (two notes).
@@ -228,7 +228,7 @@ class AudioSynthesizer:
         note2: str,
         note_duration: float = 1.0,
         gap_duration: float = 0.5,
-        output_path: str = None,
+        output_path: str | None = None,
     ) -> str:
         """
         Synthesize audio from a melodic interval (two notes played one after the other).
@@ -321,7 +321,7 @@ class AudioSynthesizer:
         root_duration: float = 1.5,
         second_duration: float = 1.5,
         delay_ms: int = 400,
-        output_path: str = None,
+        output_path: str | None = None,
     ) -> str:
         """
         Synthesize audio from a staggered interval (root note starts before second note).
@@ -370,7 +370,7 @@ class AudioSynthesizer:
         self,
         progression: list[list[str]],
         chord_duration: float = 1.5,
-        output_path: str = None,
+        output_path: str | None = None,
     ) -> str:
         """
         Synthesize audio from a chord progression.

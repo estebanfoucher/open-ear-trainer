@@ -17,15 +17,15 @@ from exercises.base.metadata import ExerciseData, ExerciseMetadata, ExerciseResu
 class BaseIntervalExercise(BaseExercise):
     """
     Base class for interval recognition exercises.
-    
+
     Provides common functionality for generating interval exercises with
     different interval sets and timing (melodic vs harmonic).
     """
-    
+
     def __init__(self, intervals: list[str], exercise_type: str, timing: str):
         """
         Initialize the interval exercise.
-        
+
         Args:
             intervals: List of interval names (e.g., ["octave", "minor_third"])
             exercise_type: Type of exercise (e.g., "thirds_and_octave", "perfect_intervals")
@@ -35,18 +35,22 @@ class BaseIntervalExercise(BaseExercise):
         self.exercise_type = exercise_type
         self.timing = timing
         self.is_melodic = timing == "melodic"
-        
+
         # Set up metadata
         self.metadata = self._create_metadata()
-    
+
     def _create_metadata(self) -> ExerciseMetadata:
         """Create metadata based on the exercise configuration."""
-        interval_names = [self._get_interval_display_name(interval) for interval in self.intervals]
+        interval_names = [
+            self._get_interval_display_name(interval) for interval in self.intervals
+        ]
         interval_list = ", ".join(interval_names[:-1]) + f" and {interval_names[-1]}"
-        
+
         timing_desc = "melodic" if self.is_melodic else "harmonic"
-        timing_desc_full = "staggered timing" if self.is_melodic else "simultaneous notes"
-        
+        timing_desc_full = (
+            "staggered timing" if self.is_melodic else "simultaneous notes"
+        )
+
         return ExerciseMetadata(
             id=f"{self.exercise_type}_{timing_desc}",
             name=f"{self.exercise_type.replace('_', ' ').title()} ({timing_desc.title()})",
@@ -54,11 +58,15 @@ class BaseIntervalExercise(BaseExercise):
             difficulty=1,
             prerequisites=[],
             learning_objectives=[
-                f"Recognize {interval_name} intervals" for interval_name in interval_names
-            ] + [f"Develop {timing_desc} interval recognition skills"],
+                f"Recognize {interval_name} intervals"
+                for interval_name in interval_names
+            ]
+            + [f"Develop {timing_desc} interval recognition skills"],
             estimated_time=300,  # 5 minutes for 20 questions
             category="interval_recognition",
-            tags=["intervals"] + [interval.replace("_", "") for interval in self.intervals] + [timing_desc],
+            tags=["intervals"]
+            + [interval.replace("_", "") for interval in self.intervals]
+            + [timing_desc],
             input_type="multiple_choice",
             answer_format="interval_name",
             requires_progression=False,
@@ -72,7 +80,7 @@ class BaseIntervalExercise(BaseExercise):
                 "timing": self.timing,
             },
         )
-    
+
     def generate(self, **kwargs) -> ExerciseData:
         """
         Generate an interval recognition exercise.
@@ -132,7 +140,9 @@ class BaseIntervalExercise(BaseExercise):
         total_questions = self.metadata.config_options.get("total_questions", 20)
 
         # Create options (all available intervals for this exercise)
-        options = [self._get_interval_display_name(interval) for interval in self.intervals]
+        options = [
+            self._get_interval_display_name(interval) for interval in self.intervals
+        ]
 
         # Create context with exercise information
         context = {
@@ -296,8 +306,13 @@ class BaseIntervalExercise(BaseExercise):
             validated["question_number"] = 1
 
         # Validate reference note
-        available_notes = self.metadata.config_options.get("reference_notes", ["C", "D", "E", "F", "G", "A", "B"])
-        if "reference_note" in validated and validated["reference_note"] not in available_notes:
+        available_notes = self.metadata.config_options.get(
+            "reference_notes", ["C", "D", "E", "F", "G", "A", "B"]
+        )
+        if (
+            "reference_note" in validated
+            and validated["reference_note"] not in available_notes
+        ):
             del validated["reference_note"]
 
         # Validate interval

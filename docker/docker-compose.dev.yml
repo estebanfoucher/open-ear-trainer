@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key}
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - SOUNDFONT_PATH=/app/soundfonts/School_Piano_2024.sf2
+      - AUDIO_CACHE_ENABLED=False
+      - AUDIO_CACHE_MAX_SIZE=100
+    volumes:
+      - ../media:/app/media
+      - ../soundfonts:/app/soundfonts
+      - ../backend:/app/backend  # Hot reload for development
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/exercises/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+    environment:
+      - REACT_APP_API_URL=http://web:8000
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - web
+    restart: unless-stopped

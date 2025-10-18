@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - SOUNDFONT_PATH=/app/soundfonts/School_Piano_2024.sf2
+      - AUDIO_CACHE_ENABLED=True
+      - AUDIO_CACHE_MAX_SIZE=1000
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - REDIS_URL=${REDIS_URL}
+    volumes:
+      - ../media:/app/media
+      - ../soundfonts:/app/soundfonts
+      - logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/exercises/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ../staticfiles:/var/www/static:ro
+      - ../frontend/build:/var/www/frontend:ro
+      - ../media:/var/www/media:ro
+      - ssl_certs:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+volumes:
+  logs:
+  redis_data:
+  ssl_certs:
