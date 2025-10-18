@@ -56,13 +56,13 @@ test: ## Run all tests
 	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/ -v
 
 test-unit: ## Run unit tests only
-	.venv/bin/activate && pytest backend/tests/ -v -m "not integration"
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/ -v -m "not integration"
 
 test-integration: ## Run integration tests only
-	.venv/bin/activate && pytest backend/tests/ -v -m integration
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/ -v -m integration
 
 test-coverage: ## Run tests with coverage report
-	.venv/bin/activate && pytest backend/tests/ --cov=backend --cov-report=html --cov-report=term-missing
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/ --cov=backend --cov-report=html --cov-report=term-missing
 
 # Database
 migrate:
