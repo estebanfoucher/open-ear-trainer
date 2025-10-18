@@ -48,7 +48,7 @@ const App: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState<number>(1);
   const [totalQuestions] = useState<number>(20);
   const [score, setScore] = useState<{correct: number, total: number}>({correct: 0, total: 0});
-  const [questionHistory, setQuestionHistory] = useState<Array<{question: number, answer: string, correct: boolean, correctAnswer: string}>>([]);
+  const [, setQuestionHistory] = useState<Array<{question: number, answer: string, correct: boolean, correctAnswer: string}>>([]);
 
   useEffect(() => {
     fetchExercises();
@@ -91,21 +91,22 @@ const App: React.FC = () => {
     }
   };
 
-  const checkAnswer = async (exerciseId: string, answer: string) => {
-    try {
-      setLoading(true);
-      const response = await axios.post(`/api/exercises/${exerciseId}/check/`, {
-        answer: answer,
-        context: exerciseData?.context
-      });
-      setResult(response.data);
-    } catch (err) {
-      setError('Failed to check answer');
-      console.error('Error checking answer:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Note: checkAnswer function is available but not used in current implementation
+  // const checkAnswer = async (exerciseId: string, answer: string) => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await axios.post(`/api/exercises/${exerciseId}/check/`, {
+  //       answer: answer,
+  //       context: exerciseData?.context
+  //     });
+  //     setResult(response.data);
+  //   } catch (err) {
+  //     setError('Failed to check answer');
+  //     console.error('Error checking answer:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const playAudio = (audioUrl: string) => {
     if (audioUrl) {
