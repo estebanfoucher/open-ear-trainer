@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["python311", "uv"]
+
+[phases.install]
+cmds = [
+  "uv venv",
+  "source .venv/bin/activate",
+  "uv pip install -e ."
+]
+
+[phases.build]
+cmds = [
+  "cd backend",
+  "python manage.py migrate"
+]
+
+[start]
+cmd = "cd backend && python manage.py runserver 0.0.0.0:$PORT"

@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "cd backend && python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT",
+    "startCommand": "uv venv && source .venv/bin/activate && uv pip install -e . && cd backend && python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT",
     "healthcheckPath": "/api/exercises/",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
