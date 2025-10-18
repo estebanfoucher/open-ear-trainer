@@ -8,7 +8,7 @@ module.exports = function(app) {
       changeOrigin: true,
     })
   );
-  
+
   app.use(
     '/media',
     createProxyMiddleware({

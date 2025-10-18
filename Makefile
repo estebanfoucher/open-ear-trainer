@@ -137,3 +137,9 @@ check: ## Run all checks (lint, format, type-check, test)
 	$(MAKE) format
 	$(MAKE) type-check
 	$(MAKE) test-unit
+
+pre-commit: ## Run pre-commit hooks on all files
+	uv run pre-commit run --all-files
+
+pre-commit-install: ## Install pre-commit hooks
+	uv run pre-commit install

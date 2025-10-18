@@ -322,9 +322,8 @@ class AudioFileView(APIView):
                 content_type = "audio/wav"  # Default
 
             # Serve the file
-            return FileResponse(
-                open(file_path, "rb"), content_type=content_type, filename=filename
-            )
+            with open(file_path, "rb") as f:
+                return FileResponse(f, content_type=content_type, filename=filename)
 
         except Exception as e:
             logger.error(f"Error serving audio file {filename}: {e}")

@@ -72,12 +72,12 @@ class MyNewExercise(BaseExercise):
         category="interval_recognition",
         tags=["intervals", "perfect", "melodic"]
     )
-    
+
     def generate(self, **kwargs) -> IntervalExerciseData:
         # Generate exercise content
         # Return IntervalExerciseData with audio, options, etc.
         pass
-    
+
     def check_answer(self, answer: str, context: dict) -> IntervalExerciseResult:
         # Validate user answer
         # Return IntervalExerciseResult with correctness and feedback
@@ -181,7 +181,7 @@ def test_exercise_generation():
     """Test that exercise generates valid data."""
     exercise = MyExercise()
     data = exercise.generate()
-    
+
     assert data is not None
     assert data.target_audio is not None
     assert len(data.options) > 0

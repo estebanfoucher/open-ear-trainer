@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  
+
   // 20-question exercise state
   const [currentQuestion, setCurrentQuestion] = useState<number>(1);
   const [totalQuestions] = useState<number>(20);
@@ -73,10 +73,10 @@ const App: React.FC = () => {
       setError('');
       setResult(null);
       setSelectedAnswer('');
-      
+
       const response = await axios.get(`/api/exercises/${exerciseId}/generate/?question_number=${questionNumber}`);
       setExerciseData(response.data);
-      
+
       // Auto-play the audio when question loads
       if (response.data.target_audio) {
         setTimeout(() => {
@@ -119,18 +119,18 @@ const App: React.FC = () => {
 
   const handleAnswerClick = (answer: string) => {
     if (!selectedExercise || !exerciseData) return;
-    
+
     setSelectedAnswer(answer);
-    
+
     // Check if answer is correct
     const isCorrect = answer === exerciseData.correct_answer;
-    
+
     // Update score
     setScore(prev => ({
       correct: prev.correct + (isCorrect ? 1 : 0),
       total: prev.total + 1
     }));
-    
+
     // Add to history
     setQuestionHistory(prev => [...prev, {
       question: currentQuestion,
@@ -138,7 +138,7 @@ const App: React.FC = () => {
       correct: isCorrect,
       correctAnswer: exerciseData.correct_answer
     }]);
-    
+
     // Show result briefly, then auto-advance
     setResult({
       is_correct: isCorrect,
@@ -147,7 +147,7 @@ const App: React.FC = () => {
       feedback: isCorrect ? "Correct!" : `Incorrect. The correct answer was ${exerciseData.correct_answer.replace('_', ' ')}.`,
       hints_used: []
     });
-    
+
     // Auto-advance to next question after 2 seconds
     setTimeout(() => {
       if (currentQuestion < totalQuestions) {
@@ -174,11 +174,11 @@ const App: React.FC = () => {
   return (
     <div className="container">
       <h1>🎵 Musical Ear Trainer</h1>
-      
+
       {error && <div className="error">{error}</div>}
-      
+
       {loading && <div className="loading">Loading...</div>}
-      
+
       {!selectedExercise ? (
         <div className="card">
           <h2>Choose an Exercise</h2>
@@ -190,7 +190,7 @@ const App: React.FC = () => {
                 <p><strong>Difficulty:</strong> {exercise.difficulty}/10</p>
                 <p><strong>Category:</strong> {exercise.category}</p>
                 <p><strong>Estimated time:</strong> {exercise.estimated_time} seconds</p>
-                <button 
+                <button
                   className="btn"
                   onClick={() => startExercise(exercise)}
                 >
@@ -213,7 +213,7 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {exerciseData && (
             <div>
               <div className="audio-player">
@@ -223,7 +223,7 @@ const App: React.FC = () => {
                 </p>
                 <div className="audio-controls">
                   {exerciseData.target_audio && (
-                    <button 
+                    <button
                       className="btn btn-secondary"
                       onClick={() => playAudio(exerciseData.target_audio!)}
                     >
@@ -232,7 +232,7 @@ const App: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div>
                 <h3>What interval do you hear?</h3>
                 <div className="exercise-options">
@@ -254,7 +254,7 @@ const App: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                
+
                 {result && (
                   <div className={`feedback ${result.is_correct ? 'correct' : 'incorrect'}`}>
                     {result.feedback}
@@ -263,8 +263,8 @@ const App: React.FC = () => {
               </div>
             </div>
           )}
-          
-          <button 
+
+          <button
             className="btn btn-secondary"
             onClick={() => {
               setSelectedExercise(null);

@@ -93,10 +93,10 @@ open-ear-trainer/
    ```bash
    # Using Docker (recommended)
    python deploy.py docker --env dev
-   
+
    # Or using Make
    make docker-run-dev
-   
+
    # Or manually
    make run
    ```
@@ -176,11 +176,11 @@ class MyExercise(BaseExercise):
         category="interval_recognition",
         tags=["intervals", "melodic"]
     )
-    
+
     def generate(self, **kwargs) -> ExerciseData:
         # Generate exercise content
         pass
-    
+
     def check_answer(self, answer, context) -> ExerciseResult:
         # Validate user answer
         pass

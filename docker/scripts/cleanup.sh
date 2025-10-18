@@ -56,7 +56,7 @@ confirm() {
     if [ "$FORCE" = true ]; then
         return 0
     fi
-    
+
     read -p "$1 (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
