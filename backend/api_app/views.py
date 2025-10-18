@@ -5,10 +5,14 @@ API views for the ear trainer.
 import logging
 import os
 
+from django.conf import settings
+
 # Simple exercise registry - we'll import exercises directly
 from exercises.level1.interval_recognition import (
-    IntervalRecognitionExercise,
     MinorThirdMajorThirdOctaveMelodicExercise,
+)
+from exercises.level1.perfect_intervals_harmonic import (
+    PerfectFourthPerfectFifthOctaveHarmonicExercise,
 )
 from exercises.level1.perfect_intervals_melodic import (
     PerfectFourthPerfectFifthOctaveMelodicExercise,
@@ -16,10 +20,6 @@ from exercises.level1.perfect_intervals_melodic import (
 from exercises.level1.thirds_octave_harmonic import (
     MinorThirdMajorThirdOctaveHarmonicExercise,
 )
-from exercises.level1.perfect_intervals_harmonic import (
-    PerfectFourthPerfectFifthOctaveHarmonicExercise,
-)
-from django.conf import settings
 
 
 # Simple exercise registry replacement

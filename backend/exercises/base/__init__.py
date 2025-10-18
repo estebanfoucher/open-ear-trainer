@@ -1,1 +1,1 @@
-# Base exercise framework
+# Base exercises package

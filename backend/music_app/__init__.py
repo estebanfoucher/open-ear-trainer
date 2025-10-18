@@ -1,1 +1,1 @@
-# Music theory module
+# Music app package

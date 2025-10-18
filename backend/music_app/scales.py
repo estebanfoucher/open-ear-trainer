@@ -125,25 +125,25 @@ def get_ionian_mode(root: str) -> list[str]:
 def get_dorian_mode(root: str) -> list[str]:
     """Get Dorian mode."""
     scale = mingus_scales.Dorian(root)
-    return [str(note) for note in scale]
+    return [str(note) for note in scale.ascending()]
 
 
 def get_phrygian_mode(root: str) -> list[str]:
     """Get Phrygian mode."""
     scale = mingus_scales.Phrygian(root)
-    return [str(note) for note in scale]
+    return [str(note) for note in scale.ascending()]
 
 
 def get_lydian_mode(root: str) -> list[str]:
     """Get Lydian mode."""
     scale = mingus_scales.Lydian(root)
-    return [str(note) for note in scale]
+    return [str(note) for note in scale.ascending()]
 
 
 def get_mixolydian_mode(root: str) -> list[str]:
     """Get Mixolydian mode."""
     scale = mingus_scales.Mixolydian(root)
-    return [str(note) for note in scale]
+    return [str(note) for note in scale.ascending()]
 
 
 def get_aeolian_mode(root: str) -> list[str]:
@@ -154,7 +154,7 @@ def get_aeolian_mode(root: str) -> list[str]:
 def get_locrian_mode(root: str) -> list[str]:
     """Get Locrian mode."""
     scale = mingus_scales.Locrian(root)
-    return [str(note) for note in scale]
+    return [str(note) for note in scale.ascending()]
 
 
 def is_note_in_scale(note: str, scale: list[str]) -> bool:
@@ -185,8 +185,6 @@ def get_scale_type(scale: list[str]) -> str:
         return "unknown"
 
     # Check if it's a major scale
-    major_pattern = [2, 2, 1, 2, 2, 2, 1]  # Whole and half step pattern
-    minor_pattern = [2, 1, 2, 2, 1, 2, 2]  # Natural minor pattern
 
     # Convert notes to semitones from root
     root = mingus_notes.note_to_int(scale[0])

@@ -8,7 +8,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
+
 
 class DeploymentError(Exception):
     """Custom exception for deployment errors"""
@@ -19,8 +19,8 @@ class Deployer:
         self.project_root = project_root
         self.backend_dir = project_root / "backend"
         self.frontend_dir = project_root / "frontend"
-        
-    def run_command(self, command: List[str], cwd: Optional[Path] = None) -> subprocess.CompletedProcess:
+
+    def run_command(self, command: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess:
         """Run a command and return the result"""
         try:
             result = subprocess.run(
@@ -39,7 +39,7 @@ class Deployer:
     def check_prerequisites(self) -> None:
         """Check if all required tools are installed"""
         print("🔍 Checking prerequisites...")
-        
+
         required_tools = {
             'git': ['git', '--version'],
             'docker': ['docker', '--version'],
@@ -47,7 +47,7 @@ class Deployer:
             'node': ['node', '--version'],
             'npm': ['npm', '--version'],
         }
-        
+
         for tool, command in required_tools.items():
             try:
                 self.run_command(command)
@@ -58,38 +58,38 @@ class Deployer:
     def build_frontend(self) -> None:
         """Build the React frontend"""
         print("🏗️  Building frontend...")
-        
+
         # Install dependencies
         self.run_command(['npm', 'ci'], cwd=self.frontend_dir)
-        
+
         # Build for production
         env = os.environ.copy()
         env['REACT_APP_API_URL'] = os.getenv('REACT_APP_API_URL', 'https://your-api-domain.com')
-        
+
         self.run_command(['npm', 'run', 'build'], cwd=self.frontend_dir)
-        
+
         print("✅ Frontend built successfully")
 
     def build_docker_image(self, tag: str = "open-ear-trainer") -> None:
         """Build Docker image"""
         print(f"🐳 Building Docker image: {tag}")
-        
+
         self.run_command(['docker', 'build', '-f', 'docker/Dockerfile', '-t', tag, '.'])
         print(f"✅ Docker image built: {tag}")
 
     def deploy_docker(self, tag: str = "open-ear-trainer", environment: str = "prod") -> None:
         """Deploy using Docker Compose"""
         print(f"🚀 Deploying with Docker Compose ({environment})...")
-        
+
         # Determine compose file
         compose_file = f"docker/docker-compose.{environment}.yml" if environment != "prod" else "docker/docker-compose.yml"
-        
+
         # Stop existing containers
         try:
             self.run_command(['docker-compose', '-f', compose_file, 'down'])
         except DeploymentError:
             pass  # Ignore if no containers are running
-        
+
         # Start new containers
         self.run_command(['docker-compose', '-f', compose_file, 'up', '-d'])
         print("✅ Deployment completed")
@@ -97,20 +97,20 @@ class Deployer:
     def deploy_github_pages(self) -> None:
         """Deploy frontend to GitHub Pages"""
         print("📄 Deploying to GitHub Pages...")
-        
+
         # Check if we're in a git repository
         try:
             self.run_command(['git', 'status'])
         except DeploymentError:
             raise DeploymentError("Not in a git repository")
-        
+
         # Build frontend
         self.build_frontend()
-        
+
         # Add and commit changes
         self.run_command(['git', 'add', 'frontend/build/'])
         self.run_command(['git', 'commit', '-m', 'Deploy frontend to GitHub Pages'])
-        
+
         # Push to main branch (this will trigger GitHub Actions)
         self.run_command(['git', 'push', 'origin', 'main'])
         print("✅ Frontend deployment triggered via GitHub Actions")
@@ -118,21 +118,21 @@ class Deployer:
     def deploy_railway(self) -> None:
         """Deploy backend to Railway"""
         print("🚂 Deploying to Railway...")
-        
+
         # Check if Railway CLI is installed
         try:
             self.run_command(['railway', '--version'])
         except (subprocess.CalledProcessError, FileNotFoundError):
             print("Installing Railway CLI...")
             self.run_command(['npm', 'install', '-g', '@railway/cli'])
-        
+
         # Login to Railway (if not already logged in)
         try:
             self.run_command(['railway', 'whoami'])
         except DeploymentError:
             print("Please login to Railway:")
             self.run_command(['railway', 'login'])
-        
+
         # Deploy
         self.run_command(['railway', 'deploy'])
         print("✅ Backend deployed to Railway")
@@ -140,7 +140,7 @@ class Deployer:
     def run_tests(self) -> None:
         """Run all tests"""
         print("🧪 Running tests...")
-        
+
         # Python tests
         try:
             # Try to activate virtual environment and run tests
@@ -152,19 +152,19 @@ class Deployer:
         except DeploymentError as e:
             print(f"⚠️  Python tests failed: {e}")
             print("Continuing with deployment...")
-        
+
         # Frontend tests
         try:
             self.run_command(['npm', 'test', '--', '--watchAll=false', '--passWithNoTests'], cwd=self.frontend_dir)
         except DeploymentError:
             print("⚠️  Frontend tests failed or not configured")
-        
+
         print("✅ Tests completed")
 
     def lint_code(self) -> None:
         """Run linting"""
         print("🔍 Running linting...")
-        
+
         # Python linting
         try:
             if (self.project_root / '.venv').exists():
@@ -176,7 +176,7 @@ class Deployer:
         except DeploymentError as e:
             print(f"⚠️  Python linting failed: {e}")
             print("Continuing with deployment...")
-        
+
         print("✅ Linting completed")
 
 def main():
@@ -207,16 +207,16 @@ def main():
         default='prod',
         help='Deployment environment (default: prod)'
     )
-    
+
     args = parser.parse_args()
-    
+
     project_root = Path(__file__).parent
     deployer = Deployer(project_root)
-    
+
     try:
         # Check prerequisites
         deployer.check_prerequisites()
-        
+
         if args.command == 'test':
             deployer.run_tests()
         elif args.command == 'lint':
@@ -253,7 +253,7 @@ def main():
             deployer.build_docker_image(args.tag)
             deployer.deploy_docker(args.tag, args.env)
             print("🎉 Full deployment completed!")
-        
+
     except DeploymentError as e:
         print(f"❌ Deployment failed: {e}")
         sys.exit(1)

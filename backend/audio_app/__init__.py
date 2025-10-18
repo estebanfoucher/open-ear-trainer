@@ -1,1 +1,1 @@
-# Audio generation module
+# Audio app package

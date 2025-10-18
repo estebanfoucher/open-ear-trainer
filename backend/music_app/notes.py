@@ -16,7 +16,9 @@ def get_note_name(note: str) -> str:
     Returns:
         str: Base note name (e.g., "C", "F", "B")
     """
-    return mingus_notes.note_to_key(note)
+    # Use note_to_int and convert back to note name
+    note_int = mingus_notes.note_to_int(note)
+    return mingus_notes.int_to_note(note_int)
 
 
 def get_note_number(note: str) -> int:

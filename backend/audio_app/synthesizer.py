@@ -165,7 +165,10 @@ class AudioSynthesizer:
         return output_path
 
     def synthesize_chord(
-        self, chord_notes: list[str], duration: float = 2.0, output_path: str | None = None
+        self,
+        chord_notes: list[str],
+        duration: float = 2.0,
+        output_path: str | None = None,
     ) -> str:
         """
         Synthesize audio from a chord.
@@ -206,7 +209,11 @@ class AudioSynthesizer:
         return output_path
 
     def synthesize_interval(
-        self, note1: str, note2: str, duration: float = 2.0, output_path: str | None = None
+        self,
+        note1: str,
+        note2: str,
+        duration: float = 2.0,
+        output_path: str | None = None,
     ) -> str:
         """
         Synthesize audio from an interval (two notes).
@@ -273,7 +280,11 @@ class AudioSynthesizer:
         return output_path
 
     def synthesize_harmonic_interval(
-        self, note1: str, note2: str, duration: float = 0.5, output_path: str = None
+        self,
+        note1: str,
+        note2: str,
+        duration: float = 0.5,
+        output_path: str | None = None,
     ) -> str:
         """
         Synthesize audio from a harmonic interval (two notes played simultaneously).
@@ -493,11 +504,14 @@ class AudioSynthesizer:
         gap_duration: float,
     ):
         """Create interval using FluidSynth with real piano sounds."""
+        import wave
+
         import fluidsynth
+        import numpy as np
 
         # Initialize FluidSynth
         fs = fluidsynth.Synth()
-        fs.start(driver="file", filename=output_path)
+        fs.start()  # Start without file driver
 
         # Load SoundFont
         sfid = fs.sfload(self.soundfont_path)
@@ -507,18 +521,37 @@ class AudioSynthesizer:
         midi1 = self._note_to_midi_number(note1)
         midi2 = self._note_to_midi_number(note2)
 
+        # Calculate sample rate
+        sample_rate = 44100
+
+        # Generate samples
+        samples = []
+
         # Play first note
         fs.noteon(0, midi1, 100)
-        fs.sleep(note_duration)
+        note_samples = int(note_duration * sample_rate)
+        samples.extend(fs.get_samples(note_samples))
         fs.noteoff(0, midi1)
 
         # Add gap
-        fs.sleep(gap_duration)
+        gap_samples = int(gap_duration * sample_rate)
+        samples.extend([0] * gap_samples)
 
         # Play second note
         fs.noteon(0, midi2, 100)
-        fs.sleep(note_duration)
+        note_samples = int(note_duration * sample_rate)
+        samples.extend(fs.get_samples(note_samples))
         fs.noteoff(0, midi2)
+
+        # Convert to numpy array and save as WAV
+        audio_data = np.array(samples, dtype=np.int16)
+
+        # Save as WAV file
+        with wave.open(output_path, "wb") as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit
+            wav_file.setframerate(sample_rate)
+            wav_file.writeframes(audio_data.tobytes())
 
         # Clean up
         fs.delete()
@@ -606,11 +639,14 @@ class AudioSynthesizer:
         self, output_path: str, note1: str, note2: str, duration: float
     ):
         """Create harmonic interval using FluidSynth with real piano sounds."""
+        import wave
+
         import fluidsynth
+        import numpy as np
 
         # Initialize FluidSynth
         fs = fluidsynth.Synth()
-        fs.start(driver="file", filename=output_path)
+        fs.start()  # Start without file driver
 
         # Load SoundFont
         sfid = fs.sfload(self.soundfont_path)
@@ -620,12 +656,26 @@ class AudioSynthesizer:
         midi1 = self._note_to_midi_number(note1)
         midi2 = self._note_to_midi_number(note2)
 
+        # Calculate samples needed
+        sample_rate = 44100
+        note_samples = int(duration * sample_rate)
+
         # Play both notes simultaneously
         fs.noteon(0, midi1, 100)
         fs.noteon(0, midi2, 100)
-        fs.sleep(duration)
+        samples = fs.get_samples(note_samples)
         fs.noteoff(0, midi1)
         fs.noteoff(0, midi2)
+
+        # Convert to numpy array and save as WAV
+        audio_data = np.array(samples, dtype=np.int16)
+
+        # Save as WAV file
+        with wave.open(output_path, "wb") as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit
+            wav_file.setframerate(sample_rate)
+            wav_file.writeframes(audio_data.tobytes())
 
         # Clean up
         fs.delete()
@@ -717,11 +767,14 @@ class AudioSynthesizer:
         delay_ms: int,
     ):
         """Create staggered interval using FluidSynth with real piano sounds."""
+        import wave
+
         import fluidsynth
+        import numpy as np
 
         # Initialize FluidSynth
         fs = fluidsynth.Synth()
-        fs.start(driver="file", filename=output_path)
+        fs.start()  # Start without file driver
 
         # Load SoundFont
         sfid = fs.sfload(self.soundfont_path)
@@ -731,19 +784,38 @@ class AudioSynthesizer:
         midi1 = self._note_to_midi_number(note1)
         midi2 = self._note_to_midi_number(note2)
 
+        # Calculate timing
+        sample_rate = 44100
+        delay_seconds = delay_ms / 1000.0
+
+        # Generate samples
+        samples = []
+
         # Play root note first
         fs.noteon(0, midi1, 100)
-        fs.sleep(root_duration)
+        root_samples = int(root_duration * sample_rate)
+        samples.extend(fs.get_samples(root_samples))
         fs.noteoff(0, midi1)
 
         # Add delay before second note
-        delay_seconds = delay_ms / 1000.0
-        fs.sleep(delay_seconds)
+        delay_samples = int(delay_seconds * sample_rate)
+        samples.extend([0] * delay_samples)
 
         # Play second note
         fs.noteon(0, midi2, 100)
-        fs.sleep(second_duration)
+        second_samples = int(second_duration * sample_rate)
+        samples.extend(fs.get_samples(second_samples))
         fs.noteoff(0, midi2)
+
+        # Convert to numpy array and save as WAV
+        audio_data = np.array(samples, dtype=np.int16)
+
+        # Save as WAV file
+        with wave.open(output_path, "wb") as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit
+            wav_file.setframerate(sample_rate)
+            wav_file.writeframes(audio_data.tobytes())
 
         # Clean up
         fs.delete()

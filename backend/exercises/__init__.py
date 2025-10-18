@@ -1,1 +1,1 @@
-# Exercises package for auto-discovery
+# Exercises package

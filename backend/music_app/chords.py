@@ -17,8 +17,20 @@ def get_chord(root: str, quality: str) -> list[str]:
     Returns:
         List[str]: List of notes in the chord
     """
-    chord = mingus_chords.Chord(root, quality)
-    return [str(note) for note in chord.ascending()]
+    # Use mingus triad function instead of Chord class
+    if quality == "major":
+        chord_notes = mingus_chords.major_triad(root)
+    elif quality == "minor":
+        chord_notes = mingus_chords.minor_triad(root)
+    elif quality == "diminished":
+        chord_notes = mingus_chords.diminished_triad(root)
+    elif quality == "augmented":
+        chord_notes = mingus_chords.augmented_triad(root)
+    else:
+        # Default to major
+        chord_notes = mingus_chords.major_triad(root)
+
+    return [str(note) for note in chord_notes]
 
 
 def get_major_chord(root: str) -> list[str]:
@@ -145,11 +157,6 @@ def get_chord_inversion(chord: list[str], inversion: int) -> list[str]:
     """
     if inversion <= 0 or inversion >= len(chord):
         return chord
-
-    # Move the bass note up an octave
-    bass_note = chord[inversion]
-    # Remove the bass note and add it at the end (octave higher)
-    other_notes = [note for i, note in enumerate(chord) if i != inversion]
 
     # For simplicity, we'll just rotate the chord
     return chord[inversion:] + chord[:inversion]

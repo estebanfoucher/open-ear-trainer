@@ -49,7 +49,7 @@ format: ## Run ruff formatting
 	ruff format backend/
 
 type-check: ## Run type checking with ty
-	ty check backend/
+	uv run ty check backend/
 
 # Testing
 test: ## Run all tests

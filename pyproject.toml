@@ -37,6 +37,7 @@ dependencies = [
     "python-decouple>=3.8",
     "pillow>=10.0.0",
     "psycopg2-binary>=2.9.0",
+    "ty>=0.0.1a23",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +47,7 @@ dev = [
     "pytest-cov>=4.1.0",
     "ruff>=0.1.0",
     "pre-commit>=3.0.0",
-    "ty>=0.1.0",
+    "ty>=0.0.1a23",
     "django-stubs>=4.2.0",
 ]
 
@@ -77,11 +78,28 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    # Django-specific exceptions
+    "F403",  # star imports (normal in Django settings)
+    "F405",  # undefined names from star imports (normal in Django settings)
+    # Path handling exceptions (keep os.path for compatibility)
+    "PTH100", # os.path.abspath
+    "PTH103", # os.makedirs
+    "PTH110", # os.path.exists
+    "PTH117", # os.path.isabs
+    "PTH118", # os.path.join
+    "PTH120", # os.path.dirname
+    "PTH123", # builtin open
+    # Code style exceptions
+    "SIM116", # if-else instead of dict (readability preference)
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/**/*.py" = ["ARG001", "S101"]
+# Django settings files - star imports are normal
+"backend/config/settings/*.py" = ["F403", "F405"]
+# API views - imports after code is sometimes necessary
+"backend/api_app/views.py" = ["E402"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["backend", "exercises", "music", "audio", "api"]
@@ -129,3 +147,5 @@ exclude_lines = [
 ]
 
 [tool.ty]
+# Configuration for Ty type checker
+# Keep minimal configuration for now
