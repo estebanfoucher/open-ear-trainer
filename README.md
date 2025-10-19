@@ -188,7 +188,7 @@ class MyExercise(BaseExercise):
 
 ## 🎵 Audio System
 
-The application generates high-quality audio using:
+The application generates high-quality audio using this:
 
 - **FluidSynth**: Real-time audio synthesis
 - **SoundFonts**: Professional instrument sounds

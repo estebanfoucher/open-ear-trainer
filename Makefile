@@ -87,14 +87,24 @@ clean-audio: ## Clean generated audio files
 docker-build: ## Build Docker image
 	docker build -f docker/Dockerfile -t open-ear-trainer .
 
-docker-run: ## Run with Docker (production)
-	docker-compose -f docker/docker-compose.yml up
+docker-run: ## Run container (production-like, Dockerfile only)
+	docker run --rm -p 8000:8000 \
+	  -e PORT=8000 \
+	  -e DJANGO_SETTINGS_MODULE=config.settings.production \
+	  -e SECRET_KEY=$${SECRET_KEY:-local-dev} \
+	  -e DEBUG=False \
+	  -e ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0 \
+	  open-ear-trainer
 
-docker-run-dev: ## Run with Docker (development)
-	docker-compose -f docker/docker-compose.dev.yml up
-
-docker-run-prod: ## Run with Docker (production)
-	docker-compose -f docker/docker-compose.prod.yml up
+docker-run-dev: ## Run container (development, Dockerfile only)
+	docker run --rm -p 8000:8000 \
+	  -e PORT=8000 \
+	  -e DJANGO_SETTINGS_MODULE=config.settings.development \
+	  -e SECRET_KEY=local-dev \
+	  -e DEBUG=True \
+	  -e ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0 \
+	  -e AUDIO_CACHE_ENABLED=False \
+	  open-ear-trainer
 
 docker-clean: ## Clean up Docker resources
 	docker/scripts/cleanup.sh

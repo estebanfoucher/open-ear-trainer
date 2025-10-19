@@ -301,10 +301,12 @@ class AudioFileView(APIView):
     def get(self, request, filename):
         """Serve an audio file."""
         try:
-            # Construct file path
-            file_path = os.path.join(settings.MEDIA_ROOT, "audio", filename)
+            # Construct file path (supports cached files)
+            primary_path = os.path.join(settings.MEDIA_ROOT, "audio", filename)
+            cache_path = os.path.join(settings.MEDIA_ROOT, "audio", "cache", filename)
+            file_path = primary_path if os.path.exists(primary_path) else cache_path
 
-            # Check if file exists
+            # Check if file exists in either location
             if not os.path.exists(file_path):
                 return Response(
                     {
