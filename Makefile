@@ -64,6 +64,35 @@ test-integration: ## Run integration tests only
 test-coverage: ## Run tests with coverage report
 	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/ --cov=backend --cov-report=html --cov-report=term-missing
 
+test-backend: ## Run all backend tests
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/test_exercises/ backend/tests/test_api/ backend/tests/test_audio/ backend/tests/test_structure/ backend/tests/integration/ -v
+
+test-frontend: ## Run frontend tests
+	cd frontend && npm test -- --coverage --watchAll=false
+
+test-e2e: ## Run E2E tests
+	cd e2e && npm test
+
+test-all: ## Run all tests (backend, frontend, E2E)
+	$(MAKE) test-backend
+	$(MAKE) test-frontend
+	$(MAKE) test-e2e
+
+test-performance: ## Run performance tests
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/performance/ -v
+
+test-audio: ## Run audio synthesis tests
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/test_audio/ -v
+
+test-exercises: ## Run exercise tests
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/test_exercises/ -v
+
+test-api: ## Run API tests
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/test_api/ -v
+
+test-structure: ## Run structure tests (chapters/lessons)
+	DJANGO_SETTINGS_MODULE=config.settings.test uv run pytest backend/tests/test_structure/ -v
+
 # Database
 migrate:
 	source .venv/bin/activate && cd backend && PYTHONPATH=/Users/estebanfoucher/workspace/open-ear-trainer/backend DJANGO_SETTINGS_MODULE=config.settings.development python manage.py migrate

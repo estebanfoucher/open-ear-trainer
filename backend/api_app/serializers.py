@@ -19,6 +19,10 @@ class ExerciseListSerializer(serializers.Serializer):
     learning_objectives = serializers.ListField(child=serializers.CharField())
     input_type = serializers.CharField()
     answer_format = serializers.CharField()
+    requires_progression = serializers.BooleanField()
+    requires_single_note = serializers.BooleanField()
+    audio_duration = serializers.IntegerField()
+    config_options = serializers.DictField()
 
 
 class ExerciseDataSerializer(serializers.Serializer):
@@ -36,7 +40,7 @@ class ExerciseDataSerializer(serializers.Serializer):
 class AnswerCheckSerializer(serializers.Serializer):
     """Serializer for answer check requests."""
 
-    answer = serializers.CharField()
+    answer = serializers.CharField(allow_blank=True)
 
 
 class AnswerResultSerializer(serializers.Serializer):
@@ -47,7 +51,7 @@ class AnswerResultSerializer(serializers.Serializer):
     correct_answer = serializers.CharField()
     feedback = serializers.CharField()
     hints_used = serializers.ListField(child=serializers.CharField(), required=False)
-    time_taken = serializers.IntegerField(required=False)
+    time_taken = serializers.IntegerField(required=False, allow_null=True)
 
 
 class ExerciseGenerateSerializer(serializers.Serializer):

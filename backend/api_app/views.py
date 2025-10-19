@@ -265,8 +265,21 @@ class ExerciseCheckView(APIView):
             # This is a simplified version - in a real app, you'd store context in session/DB
             context = request.data.get("context", {})
 
+            # Add correct_answer to context if not present
+            if "correct_answer" not in context:
+                # Generate a temporary exercise to get the correct answer
+                # Use the same parameters from the context if available
+                temp_exercise = exercise_class
+                temp_config = {}
+                if "interval" in context:
+                    temp_config["interval"] = context["interval"]
+                if "reference_note" in context:
+                    temp_config["reference_note"] = context["reference_note"]
+                temp_data = temp_exercise.generate(**temp_config)
+                context["correct_answer"] = temp_data.correct_answer
+
             # Create exercise instance and check answer
-            exercise = exercise_class()
+            exercise = exercise_class
             result = exercise.check_answer(serializer.validated_data["answer"], context)
 
             # Convert result to dict for serialization
@@ -279,7 +292,7 @@ class ExerciseCheckView(APIView):
                 "time_taken": result.time_taken,
             }
 
-            result_serializer = AnswerResultSerializer(result_dict)
+            result_serializer = AnswerResultSerializer(data=result_dict)
             if result_serializer.is_valid():
                 return Response(result_serializer.data)
             else:
@@ -361,7 +374,7 @@ class ExerciseInstructionsView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            exercise = exercise_class()
+            exercise = exercise_class
             instructions = exercise.get_instructions()
             hints = exercise.get_hints()
 

@@ -53,7 +53,7 @@ class BaseIntervalExercise(BaseExercise):
 
         return ExerciseMetadata(
             id=f"{self.exercise_type}_{timing_desc}",
-            name=f"{self.exercise_type.replace('_', ' ').title()} ({timing_desc.title()})",
+            name=f"{interval_list} ({timing_desc.title()})",
             description=f"Identify the interval: {interval_list}. 20 questions with {timing_desc_full}.",
             difficulty=1,
             prerequisites=[],
@@ -151,6 +151,7 @@ class BaseIntervalExercise(BaseExercise):
             "question_number": question_number,
             "total_questions": total_questions,
             "timing": self.timing,
+            "octave": octave,
         }
 
         # Convert file path to URL
