@@ -54,9 +54,9 @@ class TestAPIContracts(APITestCase):
         ]
 
         for endpoint in required_exercise_endpoints:
-            assert (
-                endpoint in exercises_endpoints
-            ), f"Missing exercise endpoint: {endpoint}"
+            assert endpoint in exercises_endpoints, (
+                f"Missing exercise endpoint: {endpoint}"
+            )
 
         audio_endpoints = endpoints["audio"]
         assert "file" in audio_endpoints

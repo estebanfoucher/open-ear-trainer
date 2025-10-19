@@ -48,6 +48,9 @@ lint: ## Run ruff linting
 format: ## Run ruff formatting
 	ruff format backend/
 
+format-check: ## Check ruff formatting without fixing
+	ruff format --check backend/
+
 type-check: ## Run type checking with ty
 	uv run ty check backend/
 
