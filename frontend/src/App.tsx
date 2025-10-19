@@ -112,7 +112,12 @@ const App: React.FC = () => {
 
   const playAudio = (audioUrl: string) => {
     if (audioUrl) {
-      const audio = new Audio(audioUrl);
+      // Construct full URL if it's a relative path
+      const fullAudioUrl = audioUrl.startsWith('http')
+        ? audioUrl
+        : `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}${audioUrl}`;
+
+      const audio = new Audio(fullAudioUrl);
       audio.play().catch(err => {
         console.error('Error playing audio:', err);
         setError('Failed to play audio');

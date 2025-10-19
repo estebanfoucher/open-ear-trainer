@@ -4,6 +4,7 @@ API views for the ear trainer.
 
 import logging
 import os
+from pathlib import Path
 
 from django.conf import settings
 
@@ -322,8 +323,12 @@ class AudioFileView(APIView):
                 content_type = "audio/wav"  # Default
 
             # Serve the file
-            with open(file_path, "rb") as f:
-                return FileResponse(f, content_type=content_type, filename=filename)
+            file_handle = open(file_path, "rb")  # noqa: SIM115
+            response = FileResponse(
+                file_handle, content_type=content_type, filename=filename
+            )
+            response["Content-Length"] = Path(file_path).stat().st_size
+            return response
 
         except Exception as e:
             logger.error(f"Error serving audio file {filename}: {e}")
