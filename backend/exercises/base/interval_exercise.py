@@ -140,9 +140,7 @@ class BaseIntervalExercise(BaseExercise):
         total_questions = self.metadata.config_options.get("total_questions", 20)
 
         # Create options (all available intervals for this exercise)
-        options = [
-            self._get_interval_display_name(interval) for interval in self.intervals
-        ]
+        options = [self._get_interval_notation(interval) for interval in self.intervals]
 
         # Create context with exercise information
         context = {
@@ -164,7 +162,7 @@ class BaseIntervalExercise(BaseExercise):
             progression_audio=None,
             target_audio=interval_audio_url,
             options=options,
-            correct_answer=self._get_interval_display_name(interval),
+            correct_answer=self._get_interval_notation(interval),
             context=context,
         )
 
@@ -276,6 +274,34 @@ class BaseIntervalExercise(BaseExercise):
             "octave": "Octave",
         }
         return display_names.get(interval, interval.replace("_", " ").title())
+
+    def _get_interval_notation(self, interval: str) -> str:
+        """
+        Get the interval notation for an interval.
+
+        Args:
+            interval: The interval name
+
+        Returns:
+            str: Interval notation (e.g., "3m", "3M", "4J", "5J", "8J")
+        """
+        notation_map = {
+            "unison": "1J",
+            "minor_second": "2m",
+            "major_second": "2M",
+            "minor_third": "3m",
+            "major_third": "3M",
+            "perfect_fourth": "4J",
+            "augmented_fourth": "4+",
+            "diminished_fifth": "5°",
+            "perfect_fifth": "5J",
+            "minor_sixth": "6m",
+            "major_sixth": "6M",
+            "minor_seventh": "7m",
+            "major_seventh": "7M",
+            "octave": "8J",
+        }
+        return notation_map.get(interval, interval.replace("_", " ").title())
 
     def validate_config(self, config: dict[str, Any]) -> dict[str, Any]:
         """

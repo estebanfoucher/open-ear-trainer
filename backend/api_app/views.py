@@ -8,6 +8,10 @@ from pathlib import Path
 
 from django.conf import settings
 
+from exercises.level1.combined_intervals_melodic import (
+    CombinedIntervalsMelodicExercise,
+)
+
 # Simple exercise registry - we'll import exercises directly
 from exercises.level1.interval_recognition import (
     MinorThirdMajorThirdOctaveMelodicExercise,
@@ -32,6 +36,7 @@ class SimpleExerciseRegistry:
             "perfect_fourth_fifth_octave_melodic": PerfectFourthPerfectFifthOctaveMelodicExercise(),
             "minor_third_major_third_octave_harmonic": MinorThirdMajorThirdOctaveHarmonicExercise(),
             "perfect_fourth_fifth_octave_harmonic": PerfectFourthPerfectFifthOctaveHarmonicExercise(),
+            "combined_intervals_melodic": CombinedIntervalsMelodicExercise(),
         }
 
     def get_exercise_count(self):

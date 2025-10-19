@@ -258,7 +258,7 @@ const App: React.FC = () => {
                       onClick={() => handleAnswerClick(option)}
                       disabled={!!result}
                     >
-                      {option.replace('_', ' ').toUpperCase()}
+                      {option}
                     </button>
                   ))}
                 </div>
