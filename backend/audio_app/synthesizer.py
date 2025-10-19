@@ -478,22 +478,30 @@ class AudioSynthesizer:
             note_duration: Duration of each note in seconds
             gap_duration: Duration of silence between notes in seconds
         """
-        try:
-            # Try to use FluidSynth for real piano sounds
-            if self.soundfont_path and os.path.exists(self.soundfont_path):
-                self._create_fluidsynth_interval(
-                    output_path, note1, note2, note_duration, gap_duration
-                )
-            else:
-                # Fallback to synthetic piano sounds
-                self._create_synthetic_interval(
-                    output_path, note1, note2, note_duration, gap_duration
-                )
-        except Exception as e:
-            logger.warning(f"FluidSynth failed, using synthetic sounds: {e}")
+        # Use synthetic sounds in Docker/headless environments
+        # FluidSynth requires audio hardware which isn't available in containers
+        if os.environ.get("DOCKER") == "true" or not os.environ.get("DISPLAY"):
+            logger.info("Using synthetic sounds (Docker/headless environment)")
             self._create_synthetic_interval(
                 output_path, note1, note2, note_duration, gap_duration
             )
+        else:
+            try:
+                # Try to use FluidSynth for real piano sounds in local development
+                if self.soundfont_path and os.path.exists(self.soundfont_path):
+                    self._create_fluidsynth_interval(
+                        output_path, note1, note2, note_duration, gap_duration
+                    )
+                else:
+                    # Fallback to synthetic piano sounds
+                    self._create_synthetic_interval(
+                        output_path, note1, note2, note_duration, gap_duration
+                    )
+            except Exception as e:
+                logger.warning(f"FluidSynth failed, using synthetic sounds: {e}")
+                self._create_synthetic_interval(
+                    output_path, note1, note2, note_duration, gap_duration
+                )
 
     def _create_fluidsynth_interval(
         self,
@@ -618,22 +626,30 @@ class AudioSynthesizer:
             note2: Second note of the interval
             duration: Duration of the interval in seconds
         """
-        try:
-            # Try to use FluidSynth for real piano sounds
-            if self.soundfont_path and os.path.exists(self.soundfont_path):
-                self._create_fluidsynth_harmonic_interval(
-                    output_path, note1, note2, duration
-                )
-            else:
-                # Fallback to synthetic piano sounds
-                self._create_synthetic_harmonic_interval(
-                    output_path, note1, note2, duration
-                )
-        except Exception as e:
-            logger.warning(f"FluidSynth failed, using synthetic sounds: {e}")
+        # Use synthetic sounds in Docker/headless environments
+        # FluidSynth requires audio hardware which isn't available in containers
+        if os.environ.get("DOCKER") == "true" or not os.environ.get("DISPLAY"):
+            logger.info("Using synthetic sounds (Docker/headless environment)")
             self._create_synthetic_harmonic_interval(
                 output_path, note1, note2, duration
             )
+        else:
+            try:
+                # Try to use FluidSynth for real piano sounds in local development
+                if self.soundfont_path and os.path.exists(self.soundfont_path):
+                    self._create_fluidsynth_harmonic_interval(
+                        output_path, note1, note2, duration
+                    )
+                else:
+                    # Fallback to synthetic piano sounds
+                    self._create_synthetic_harmonic_interval(
+                        output_path, note1, note2, duration
+                    )
+            except Exception as e:
+                logger.warning(f"FluidSynth failed, using synthetic sounds: {e}")
+                self._create_synthetic_harmonic_interval(
+                    output_path, note1, note2, duration
+                )
 
     def _create_fluidsynth_harmonic_interval(
         self, output_path: str, note1: str, note2: str, duration: float
@@ -740,22 +756,40 @@ class AudioSynthesizer:
             second_duration: Duration of the second note in seconds
             delay_ms: Delay in milliseconds before second note starts
         """
-        try:
-            # Try to use FluidSynth for real piano sounds
-            if self.soundfont_path and os.path.exists(self.soundfont_path):
-                self._create_fluidsynth_staggered_interval(
-                    output_path, note1, note2, root_duration, second_duration, delay_ms
-                )
-            else:
-                # Fallback to synthetic piano sounds
-                self._create_synthetic_staggered_interval(
-                    output_path, note1, note2, root_duration, second_duration, delay_ms
-                )
-        except Exception as e:
-            logger.warning(f"FluidSynth failed, using synthetic sounds: {e}")
+        # Use synthetic sounds in Docker/headless environments
+        # FluidSynth requires audio hardware which isn't available in containers
+        if os.environ.get("DOCKER") == "true" or not os.environ.get("DISPLAY"):
+            logger.info("Using synthetic sounds (Docker/headless environment)")
             self._create_synthetic_staggered_interval(
                 output_path, note1, note2, root_duration, second_duration, delay_ms
             )
+        else:
+            try:
+                # Try to use FluidSynth for real piano sounds in local development
+                if self.soundfont_path and os.path.exists(self.soundfont_path):
+                    self._create_fluidsynth_staggered_interval(
+                        output_path,
+                        note1,
+                        note2,
+                        root_duration,
+                        second_duration,
+                        delay_ms,
+                    )
+                else:
+                    # Fallback to synthetic piano sounds
+                    self._create_synthetic_staggered_interval(
+                        output_path,
+                        note1,
+                        note2,
+                        root_duration,
+                        second_duration,
+                        delay_ms,
+                    )
+            except Exception as e:
+                logger.warning(f"FluidSynth failed, using synthetic sounds: {e}")
+                self._create_synthetic_staggered_interval(
+                    output_path, note1, note2, root_duration, second_duration, delay_ms
+                )
 
     def _create_fluidsynth_staggered_interval(
         self,
