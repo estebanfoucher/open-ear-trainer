@@ -6,6 +6,7 @@ import hashlib
 import logging
 import os
 import tempfile
+from pathlib import Path
 
 from django.conf import settings
 
@@ -1025,6 +1026,10 @@ class AudioSynthesizer:
         media_root_str = str(settings.MEDIA_ROOT)
         if audio_path.startswith(media_root_str):
             relative_path = os.path.relpath(audio_path, media_root_str)
-            return f"{settings.MEDIA_URL}{relative_path}"
+            filename = Path(relative_path).name
+
+            # Use the API endpoint for serving audio files
+            # This ensures proper CORS headers and works across domains
+            return f"/api/audio/{filename}/"
 
         return audio_path
