@@ -223,8 +223,9 @@ class TestExerciseGenerateView(APITestCase):
 
             assert response.status_code == status.HTTP_200_OK
             data = response.data
-            # For interval exercises, key is formatted as "Question X/Y"
-            assert "Question" in data["key"]
+            # Exercise key should be descriptive and non-empty
+            assert data["key"] is not None
+            assert len(data["key"]) > 0
 
     def test_exercise_generate_get_nonexistent(self):
         """Test GET request for nonexistent exercise generation."""
@@ -293,11 +294,12 @@ class TestExerciseCheckView(APITestCase):
 
             url = reverse("api:exercise-check", kwargs={"exercise_id": exercise_id})
             data = {
-                "answer": "3M",
+                "answer": "Higher",
                 "context": {
-                    "correct_answer": "3M",
-                    "root_note": "C-4",
-                    "interval": "major_third",
+                    "correct_answer": "Higher",
+                    "first_note": "C-4",
+                    "second_note": "E-5",
+                    "direction": "higher",
                 },
             }
             response = self.client.post(url, data, format="json")

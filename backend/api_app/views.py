@@ -11,8 +11,11 @@ from django.conf import settings
 from exercises.level1.combined_intervals_melodic import (
     CombinedIntervalsMelodicExercise,
 )
-
-# Simple exercise registry - we'll import exercises directly
+from exercises.level1.direction_exercises import (
+    HighOrLowDirectionExercise,
+    MelodicShapesExercise,
+    StepVsLeapExercise,
+)
 from exercises.level1.interval_recognition import (
     MinorThirdMajorThirdOctaveMelodicExercise,
 )
@@ -25,18 +28,40 @@ from exercises.level1.perfect_intervals_melodic import (
 from exercises.level1.thirds_octave_harmonic import (
     MinorThirdMajorThirdOctaveHarmonicExercise,
 )
+from exercises.level1.tonal_center_exercises import (
+    FindHomeNoteExercise,
+    LabelDoMiSolExercise,
+    ScaleDegreesWithSolfègeExercise,
+)
+from exercises.level2.triad_exercises import (
+    FifthQualityExercise,
+    MajorVsMinorChordsExercise,
+    SuspendedChordExercise,
+)
 
 
 # Simple exercise registry replacement
 class SimpleExerciseRegistry:
     def __init__(self):
         self.exercises = {
-            # New exercises
+            # Chapter 1: Direction exercises
+            "high_or_low_direction": HighOrLowDirectionExercise(),
+            "step_vs_leap": StepVsLeapExercise(),
+            "melodic_shapes": MelodicShapesExercise(),
+            # Chapter 2: Tonal center exercises
+            "find_home_note": FindHomeNoteExercise(),
+            "scale_degrees_solfege": ScaleDegreesWithSolfègeExercise(),
+            "label_do_mi_sol": LabelDoMiSolExercise(),
+            # Chapter 3: Interval exercises (existing)
             "minor_third_major_third_octave_melodic": MinorThirdMajorThirdOctaveMelodicExercise(),
             "perfect_fourth_fifth_octave_melodic": PerfectFourthPerfectFifthOctaveMelodicExercise(),
             "minor_third_major_third_octave_harmonic": MinorThirdMajorThirdOctaveHarmonicExercise(),
             "perfect_fourth_fifth_octave_harmonic": PerfectFourthPerfectFifthOctaveHarmonicExercise(),
             "combined_intervals_melodic": CombinedIntervalsMelodicExercise(),
+            # Chapter 4: Triad exercises
+            "major_minor_triads": MajorVsMinorChordsExercise(),
+            "triad_fifth_quality": FifthQualityExercise(),
+            "suspended_chords": SuspendedChordExercise(),
         }
 
     def get_exercise_count(self):
@@ -384,5 +409,86 @@ class ExerciseInstructionsView(APIView):
             logger.error(f"Error getting instructions for exercise {exercise_id}: {e}")
             return Response(
                 {"error": "internal_error", "message": "Failed to get instructions"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+# Curriculum Navigation Views
+
+
+class ChapterListView(APIView):
+    """List all published chapters."""
+
+    def get(self, request):
+        """Get list of all published chapters."""
+        from .models import Chapter
+        from .serializers import ChapterListSerializer
+
+        try:
+            chapters = Chapter.objects.filter(is_published=True).order_by("order")
+            serializer = ChapterListSerializer(chapters, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error fetching chapters: {e}")
+            return Response(
+                {"error": "internal_error", "message": "Failed to fetch chapters"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ChapterDetailView(APIView):
+    """Get chapter detail with lessons."""
+
+    def get(self, request, chapter_id):
+        """Get chapter with its lessons."""
+        from .models import Chapter
+        from .serializers import ChapterDetailSerializer
+
+        try:
+            chapter = Chapter.objects.filter(id=chapter_id, is_published=True).first()
+            if not chapter:
+                return Response(
+                    {
+                        "error": "not_found",
+                        "message": f"Chapter {chapter_id} not found",
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            serializer = ChapterDetailSerializer(chapter)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error fetching chapter {chapter_id}: {e}")
+            return Response(
+                {"error": "internal_error", "message": "Failed to fetch chapter"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class LessonDetailView(APIView):
+    """Get lesson detail with exercises."""
+
+    def get(self, request, lesson_id):
+        """Get lesson with its exercises."""
+        from .models import Lesson
+        from .serializers import LessonDetailSerializer
+
+        try:
+            lesson = Lesson.objects.filter(id=lesson_id, is_published=True).first()
+            if not lesson:
+                return Response(
+                    {
+                        "error": "not_found",
+                        "message": f"Lesson {lesson_id} not found",
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            serializer = LessonDetailSerializer(lesson)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error fetching lesson {lesson_id}: {e}")
+            return Response(
+                {"error": "internal_error", "message": "Failed to fetch lesson"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

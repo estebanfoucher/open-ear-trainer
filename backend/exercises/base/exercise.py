@@ -214,3 +214,61 @@ class BaseExercise(ABC):
                 validated["difficulty"] = difficulty
 
         return validated
+
+    @staticmethod
+    def weighted_choice(weights: dict[str, float]) -> str:
+        """
+        Choose an item based on weighted probabilities.
+
+        This utility method can be used by any exercise to implement custom
+        probability distributions for answer choices, chord types, intervals, etc.
+
+        Args:
+            weights: Dictionary mapping choices to their probabilities
+
+        Returns:
+            str: Selected choice based on weighted probabilities
+
+        Examples:
+            # Equal probabilities (25% each)
+            chord_type = self.weighted_choice({"major": 0.25, "minor": 0.25, "dim": 0.25, "aug": 0.25})
+
+            # Custom probabilities (favor major/minor)
+            chord_type = self.weighted_choice({"major": 0.4, "minor": 0.4, "dim": 0.1, "aug": 0.1})
+
+            # Direction probabilities (favor higher)
+            direction = self.weighted_choice({"higher": 0.7, "lower": 0.3})
+
+        Usage in exercise generate() method:
+            # 1. Add config option to metadata
+            config_options={
+                "choice_probabilities": {
+                    "type": "dict",
+                    "default": {"A": 0.5, "B": 0.5},
+                    "description": "Custom probabilities for choices"
+                }
+            }
+
+            # 2. Use in generate() method
+            probabilities = kwargs.get("choice_probabilities", {"A": 0.5, "B": 0.5})
+            choice = self.weighted_choice(probabilities)
+        """
+        # Normalize weights to ensure they sum to 1.0
+        total_weight = sum(weights.values())
+        if total_weight == 0:
+            # If all weights are 0, return equal probability
+            return random.choice(list(weights.keys()))
+
+        normalized_weights = {k: v / total_weight for k, v in weights.items()}
+
+        # Generate random number and select based on cumulative probability
+        rand = random.random()
+        cumulative = 0.0
+
+        for choice, weight in normalized_weights.items():
+            cumulative += weight
+            if rand <= cumulative:
+                return choice
+
+        # Fallback (should never reach here)
+        return list(weights.keys())[0]

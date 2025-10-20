@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import ChapterList from './components/ChapterList';
+import LessonList from './components/LessonList';
+import ExerciseList from './components/ExerciseList';
 
 interface Exercise {
   id: string;
@@ -35,8 +38,59 @@ interface AnswerResult {
   time_taken?: number;
 }
 
+interface Chapter {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  difficulty_level: number;
+  lesson_count: number;
+  exercise_count: number;
+}
+
+interface Lesson {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  learning_objectives: string;
+  estimated_minutes: number;
+  chapter_id: number;
+  chapter_title: string;
+  exercises: CurriculumExercise[];
+}
+
+interface LessonSummary {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  estimated_minutes: number;
+  exercise_count: number;
+}
+
+interface CurriculumExercise {
+  id: number;
+  title: string;
+  description: string;
+  exercise_type: string;
+  order: number;
+  difficulty_level: number;
+  config: any;
+  is_published: boolean;
+}
+
+type ViewType = 'chapters' | 'lessons' | 'exercises' | 'exercise';
+
 const App: React.FC = () => {
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  // Navigation state
+  const [currentView, setCurrentView] = useState<ViewType>('chapters');
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [lessonsInChapter, setLessonsInChapter] = useState<LessonSummary[]>([]);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+
+  // Exercise state
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [exerciseData, setExerciseData] = useState<ExerciseData | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
@@ -51,21 +105,70 @@ const App: React.FC = () => {
   const [, setQuestionHistory] = useState<Array<{question: number, answer: string, correct: boolean, correctAnswer: string}>>([]);
 
   useEffect(() => {
-    fetchExercises();
+    fetchChapters();
   }, []);
 
-  const fetchExercises = async () => {
+  const fetchChapters = async () => {
     try {
       setLoading(true);
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await axios.get(`${apiUrl}/api/exercises/`);
-      setExercises(response.data);
+      const response = await axios.get(`${apiUrl}/api/chapters/`);
+      setChapters(response.data);
+    } catch (err) {
+      setError('Failed to load chapters');
+      console.error('Error fetching chapters:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectChapter = async (chapterId: number) => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/chapters/${chapterId}/`);
+      setSelectedChapter(response.data);
+      setLessonsInChapter(response.data.lessons);
+      setCurrentView('lessons');
+    } catch (err) {
+      setError('Failed to load lessons');
+      console.error('Error fetching lessons:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectLesson = async (lessonId: number) => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/lessons/${lessonId}/`);
+      setSelectedLesson(response.data);
+      setCurrentView('exercises');
     } catch (err) {
       setError('Failed to load exercises');
       console.error('Error fetching exercises:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectExercise = (exerciseType: string) => {
+    // Find the exercise in the old registry format
+    const exercise: Exercise = {
+      id: exerciseType,
+      name: exerciseType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: 'Interval recognition exercise',
+      difficulty: 1,
+      category: 'intervals',
+      tags: [],
+      estimated_time: 600,
+      prerequisites: [],
+      learning_objectives: [],
+      input_type: 'multiple_choice',
+      answer_format: 'interval_name',
+    };
+    startExercise(exercise);
   };
 
   const generateExercise = async (exerciseId: string, questionNumber: number = 1) => {
@@ -92,23 +195,6 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // Note: checkAnswer function is available but not used in current implementation
-  // const checkAnswer = async (exerciseId: string, answer: string) => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await axios.post(`/api/exercises/${exerciseId}/check/`, {
-  //       answer: answer,
-  //       context: exerciseData?.context
-  //     });
-  //     setResult(response.data);
-  //   } catch (err) {
-  //     setError('Failed to check answer');
-  //     console.error('Error checking answer:', err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const playAudio = (audioUrl: string) => {
     if (audioUrl) {
@@ -167,6 +253,7 @@ const App: React.FC = () => {
         setScore({correct: 0, total: 0});
         setQuestionHistory([]);
         setSelectedExercise(null);
+        setCurrentView('exercises');
       }
     }, 2000);
   };
@@ -176,7 +263,24 @@ const App: React.FC = () => {
     setCurrentQuestion(1);
     setScore({correct: 0, total: 0});
     setQuestionHistory([]);
+    setCurrentView('exercise');
     generateExercise(exercise.id, 1);
+  };
+
+  const handleBackToChapters = () => {
+    setCurrentView('chapters');
+    setSelectedChapter(null);
+    setLessonsInChapter([]);
+  };
+
+  const handleBackToLessons = () => {
+    setCurrentView('lessons');
+    setSelectedLesson(null);
+  };
+
+  const handleBackToExercises = () => {
+    setCurrentView('exercises');
+    setSelectedExercise(null);
   };
 
   return (
@@ -187,28 +291,33 @@ const App: React.FC = () => {
 
       {loading && <div className="loading">Loading...</div>}
 
-      {!selectedExercise ? (
-        <div className="card">
-          <h2>Choose an Exercise</h2>
-          <div className="exercise-list">
-            {exercises.map((exercise) => (
-              <div key={exercise.id} className="card">
-                <h3>{exercise.name}</h3>
-                <p>{exercise.description}</p>
-                <p><strong>Difficulty:</strong> {exercise.difficulty}/10</p>
-                <p><strong>Category:</strong> {exercise.category}</p>
-                <p><strong>Estimated time:</strong> {exercise.estimated_time} seconds</p>
-                <button
-                  className="btn"
-                  onClick={() => startExercise(exercise)}
-                >
-                  Start Exercise (20 Questions)
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
+      {currentView === 'chapters' && (
+        <ChapterList
+          chapters={chapters}
+          onSelectChapter={handleSelectChapter}
+        />
+      )}
+
+      {currentView === 'lessons' && selectedChapter && (
+        <LessonList
+          chapterTitle={selectedChapter.title}
+          lessons={lessonsInChapter}
+          onSelectLesson={handleSelectLesson}
+          onBack={handleBackToChapters}
+        />
+      )}
+
+      {currentView === 'exercises' && selectedLesson && (
+        <ExerciseList
+          lessonTitle={selectedLesson.title}
+          chapterTitle={selectedLesson.chapter_title}
+          exercises={selectedLesson.exercises}
+          onSelectExercise={handleSelectExercise}
+          onBack={handleBackToLessons}
+        />
+      )}
+
+      {currentView === 'exercise' && selectedExercise && (
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2>{selectedExercise.name}</h2>
@@ -274,12 +383,7 @@ const App: React.FC = () => {
 
           <button
             className="btn btn-secondary"
-            onClick={() => {
-              setSelectedExercise(null);
-              setCurrentQuestion(1);
-              setScore({correct: 0, total: 0});
-              setQuestionHistory([]);
-            }}
+            onClick={handleBackToExercises}
             style={{ marginTop: '20px' }}
           >
             Back to Exercise List

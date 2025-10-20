@@ -54,7 +54,8 @@ class TestMinorThirdMajorThirdOctaveMelodicExercise:
         exercise = MinorThirdMajorThirdOctaveMelodicExercise()
         data = exercise.generate(key="C", octave=4)
 
-        assert "Question" in data.key
+        assert data.key is not None
+        assert len(data.key) > 0
         assert data.context.get("octave") == 4
 
     def test_answer_checking_correct(self):

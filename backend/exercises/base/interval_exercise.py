@@ -78,6 +78,14 @@ class BaseIntervalExercise(BaseExercise):
                 "octave": 4,
                 "total_questions": 20,
                 "timing": self.timing,
+                "interval_probabilities": {
+                    "type": "dict",
+                    "default": {
+                        interval: 1.0 / len(self.intervals)
+                        for interval in self.intervals
+                    },
+                    "description": "Custom probabilities for interval selection (must sum to 1.0)",
+                },
             },
         )
 
@@ -105,8 +113,14 @@ class BaseIntervalExercise(BaseExercise):
         octave = config.get("octave", 4)
         reference_note_with_octave = f"{reference_note}-{octave}"
 
-        # Select interval randomly
-        interval = config.get("interval", random.choice(self.intervals))
+        # Custom probabilities for interval selection
+        interval_probabilities = config.get(
+            "interval_probabilities",
+            {interval: 1.0 / len(self.intervals) for interval in self.intervals},
+        )
+
+        # Select interval with weighted choice
+        interval = config.get("interval", self.weighted_choice(interval_probabilities))
 
         # Calculate the second note based on the interval
         second_note = self._get_interval_note(reference_note_with_octave, interval)

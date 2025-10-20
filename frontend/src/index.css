@@ -149,3 +149,102 @@ code {
   border-radius: 8px;
   margin: 16px 0;
 }
+
+/* Navigation and Chapter/Lesson Cards */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.chapter-card,
+.lesson-card,
+.exercise-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.chapter-card:hover,
+.lesson-card:hover,
+.exercise-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chapter-header,
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chapter-header h3,
+.lesson-card h3,
+.exercise-card h3 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.difficulty-badge {
+  background-color: #007bff;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.description {
+  color: #666;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+.chapter-stats,
+.lesson-info {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.lesson-number {
+  background-color: #e3f2fd;
+  color: #007bff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+.exercise-number {
+  background-color: #f5f5f5;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.back-btn {
+  margin-bottom: 16px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.breadcrumb {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
