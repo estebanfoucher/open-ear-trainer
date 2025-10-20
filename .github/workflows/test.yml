@@ -174,6 +174,12 @@ jobs:
         cd e2e
         npx playwright install --with-deps
 
+    - name: Apply database migrations
+      run: |
+        source .venv/bin/activate
+        cd backend
+        DJANGO_SETTINGS_MODULE=config.settings.development python manage.py migrate --noinput
+
     - name: Seed database
       run: |
         source .venv/bin/activate
