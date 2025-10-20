@@ -474,7 +474,7 @@ class Command(BaseCommand):
             lesson=lesson4_1,
             order=1,
             defaults={
-                "exercise_type": "major_vs_minor_chords",
+                "exercise_type": "major_minor_triads",
                 "title": "Happy or Sad?",
                 "description": "Listen to a triad and identify if it sounds happy (major) or sad (minor).",
                 "difficulty_level": 2,
@@ -508,7 +508,7 @@ class Command(BaseCommand):
             lesson=lesson4_3,
             order=1,
             defaults={
-                "exercise_type": "suspended_chord_exercise",
+                "exercise_type": "suspended_chords",
                 "title": "Suspended Chord Exercise",
                 "description": "Listen to a chord and identify its type: suspended 4th, suspended 2nd, minor third, or major third.",
                 "difficulty_level": 3,
@@ -521,21 +521,22 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Created Exercise: {exercise4_3_1.title}")
             )
 
-        exercise4_4_1, created = Exercise.objects.get_or_create(
-            lesson=lesson4_4,
-            order=1,
-            defaults={
-                "exercise_type": "identify_bass_note",
-                "title": "Identify Bass Note",
-                "description": "Listen to a triad in inversion and identify which note is in the bass (lowest).",
-                "difficulty_level": 3,
-                "config": {},
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise4_3_1.title}")
-            )
+        # TODO: Add identify_bass_note exercise to registry when implemented
+        # exercise4_4_1, created = Exercise.objects.get_or_create(
+        #     lesson=lesson4_4,
+        #     order=1,
+        #     defaults={
+        #         "exercise_type": "identify_bass_note",
+        #         "title": "Identify Bass Note",
+        #         "description": "Listen to a triad in inversion and identify which note is in the bass (lowest).",
+        #         "difficulty_level": 3,
+        #         "config": {},
+        #         "is_published": True,
+        #     },
+        # )
+        # if created:
+        #     self.stdout.write(
+        #         self.style.SUCCESS(f"Created Exercise: {exercise4_4_1.title}")
+        #     )
 
         self.stdout.write(self.style.SUCCESS("Successfully seeded curriculum data!"))

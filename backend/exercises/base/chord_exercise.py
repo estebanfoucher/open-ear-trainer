@@ -57,7 +57,7 @@ class BaseChordExercise(BaseExercise):
             tags=["chords"]
             + [chord_type.replace("_", "") for chord_type in self.chord_types],
             estimated_time=900,
-            prerequisites=["major_vs_minor_chords"],
+            prerequisites=["major_minor_triads"],
             learning_objectives=[
                 f"Recognize {chord_name} chords" for chord_name in chord_names
             ]

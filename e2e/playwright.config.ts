@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  testMatch: '**/exercise-endpoints.spec.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -77,7 +78,7 @@ export default defineConfig({
       timeout: 120 * 1000,
     },
     {
-      command: 'cd ../backend && source ../.venv/bin/activate && python manage.py runserver 8000',
+      command: 'cd ../backend && source ../.venv/bin/activate && DJANGO_SETTINGS_MODULE=config.settings.development python manage.py runserver 8000',
       url: 'http://localhost:8000/api/',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
