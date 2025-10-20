@@ -1,0 +1,220 @@
+name: Backend Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Install Python dependencies
+      run: |
+        uv venv
+        source .venv/bin/activate
+        uv pip install -e ".[dev]"
+
+    - name: Run backend unit tests
+      run: |
+        source .venv/bin/activate
+        DJANGO_SETTINGS_MODULE=config.settings.test pytest backend/tests/test_exercises/ -v --cov=backend --cov-report=xml --cov-report=term-missing
+
+    - name: Run backend API tests
+      run: |
+        source .venv/bin/activate
+        DJANGO_SETTINGS_MODULE=config.settings.test pytest backend/tests/test_api/ -v --cov=backend --cov-append --cov-report=xml --cov-report=term-missing
+
+    - name: Run backend audio tests
+      run: |
+        source .venv/bin/activate
+        DJANGO_SETTINGS_MODULE=config.settings.test pytest backend/tests/test_audio/ -v --cov=backend --cov-append --cov-report=xml --cov-report=term-missing
+
+    - name: Run backend structure tests
+      run: |
+        source .venv/bin/activate
+        DJANGO_SETTINGS_MODULE=config.settings.test pytest backend/tests/test_structure/ -v --cov=backend --cov-append --cov-report=xml --cov-report=term-missing
+
+    - name: Run backend integration tests
+      run: |
+        source .venv/bin/activate
+        DJANGO_SETTINGS_MODULE=config.settings.test pytest backend/tests/integration/ -v --cov=backend --cov-append --cov-report=xml --cov-report=term-missing
+
+
+    - name: Upload backend coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: backend
+        name: backend-coverage
+
+  linting:
+    name: Linting
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Install Python dependencies
+      run: |
+        uv venv
+        source .venv/bin/activate
+        uv pip install -e ".[dev]"
+
+    - name: Run linting
+      run: |
+        source .venv/bin/activate
+        ruff check backend/
+
+    - name: Run formatting check
+      run: |
+        source .venv/bin/activate
+        ruff format --check backend/
+
+  type-checking:
+    name: Type Checking
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Install Python dependencies
+      run: |
+        uv venv
+        source .venv/bin/activate
+        uv pip install -e ".[dev]"
+
+    - name: Run type checking
+      run: |
+        source .venv/bin/activate
+        ty check backend/
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          frontend/package-lock.json
+          e2e/package-lock.json
+
+    - name: Install uv
+      run: pip install uv
+
+    - name: Install Python dependencies
+      run: |
+        uv venv
+        source .venv/bin/activate
+        uv pip install -e ".[dev]"
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci --no-audit --no-fund
+
+    - name: Install E2E dependencies
+      run: |
+        cd e2e
+        npm ci --no-audit --no-fund
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('e2e/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
+
+    - name: Install Playwright browsers
+      run: |
+        cd e2e
+        npx playwright install --with-deps
+
+    - name: Apply database migrations
+      run: |
+        source .venv/bin/activate
+        cd backend
+        DJANGO_SETTINGS_MODULE=config.settings.development python manage.py migrate --noinput
+
+    - name: Seed database
+      run: |
+        source .venv/bin/activate
+        cd backend
+        DJANGO_SETTINGS_MODULE=config.settings.development python manage.py seed_curriculum
+
+    - name: Run E2E tests
+      run: |
+        cd e2e
+        npm test
+      env:
+        CI: true
+
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: e2e-test-results
+        path: e2e/test-results/
+        retention-days: 7
+
+    - name: Upload E2E test report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: e2e-test-report
+        path: e2e/playwright-report/
+        retention-days: 7
+
+    - name: Show E2E test summary
+      if: always()
+      run: |
+        echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+        if [ -f "e2e/test-results/results.json" ]; then
+          echo "✅ E2E tests completed successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ E2E tests failed or no results found" >> $GITHUB_STEP_SUMMARY
+        fi

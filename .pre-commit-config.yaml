@@ -2,13 +2,14 @@
 repos:
   # Ruff for Python linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.12.0
     hooks:
       # Run the linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       # Run the formatter
       - id: ruff-format
+        args: [--check]
 
   # Ty for type checking (using local installation)
   - repo: local
@@ -28,6 +29,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+        exclude: 'soundfonts/.*\.sf2$'
       - id: check-merge-conflict
       - id: debug-statements
       - id: check-json

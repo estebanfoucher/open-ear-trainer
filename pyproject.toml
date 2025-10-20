@@ -48,7 +48,7 @@ dev = [
     "pytest>=7.4.0",
     "pytest-django>=4.5.0",
     "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
+    "ruff==0.12.0",
     "pre-commit>=3.0.0",
     "ty>=0.0.1a23",
     "django-stubs>=4.2.0",
@@ -106,6 +106,8 @@ ignore = [
 "backend/config/settings/*.py" = ["F403", "F405"]
 # API views - imports after code is sometimes necessary
 "backend/api_app/views.py" = ["E402"]
+# Soundfont files - ignore file size limits for large binary files
+"soundfonts/**/*" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["backend", "exercises", "music", "audio", "api"]

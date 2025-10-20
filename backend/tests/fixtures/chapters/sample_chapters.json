@@ -1,0 +1,186 @@
+{
+  "chapters": [
+    {
+      "id": "chapter_1",
+      "name": "Basic Intervals",
+      "description": "Learn to identify basic intervals",
+      "difficulty": 1,
+      "prerequisites": [],
+      "estimated_time": 120,
+      "learning_objectives": [
+        "Understand interval concepts",
+        "Identify basic intervals",
+        "Develop listening skills"
+      ],
+      "lessons": [
+        {
+          "id": "lesson_1_1",
+          "name": "Perfect Intervals",
+          "description": "Learn perfect fourth, fifth, and octave intervals",
+          "difficulty": 1,
+          "chapter_id": "chapter_1",
+          "prerequisites": [],
+          "estimated_time": 40,
+          "learning_objectives": [
+            "Identify perfect fourth intervals",
+            "Identify perfect fifth intervals",
+            "Identify octave intervals"
+          ],
+          "completion_criteria": {
+            "min_score": 80,
+            "min_attempts": 1
+          },
+          "exercises": [
+            "perfect_fourth_fifth_octave_melodic",
+            "perfect_fourth_fifth_octave_harmonic"
+          ]
+        },
+        {
+          "id": "lesson_1_2",
+          "name": "Third Intervals",
+          "description": "Learn minor and major third intervals",
+          "difficulty": 2,
+          "chapter_id": "chapter_1",
+          "prerequisites": ["lesson_1_1"],
+          "estimated_time": 40,
+          "learning_objectives": [
+            "Identify minor third intervals",
+            "Identify major third intervals",
+            "Distinguish between minor and major thirds"
+          ],
+          "completion_criteria": {
+            "min_score": 80,
+            "min_attempts": 1
+          },
+          "exercises": [
+            "minor_third_major_third_octave_melodic",
+            "minor_third_major_third_octave_harmonic"
+          ]
+        },
+        {
+          "id": "lesson_1_3",
+          "name": "Review and Practice",
+          "description": "Review all basic intervals with combined practice",
+          "difficulty": 3,
+          "chapter_id": "chapter_1",
+          "prerequisites": ["lesson_1_1", "lesson_1_2"],
+          "estimated_time": 40,
+          "learning_objectives": [
+            "Review all basic intervals",
+            "Practice interval recognition",
+            "Build confidence with intervals"
+          ],
+          "completion_criteria": {
+            "min_score": 85,
+            "min_attempts": 2
+          },
+          "exercises": [
+            "combined_intervals_melodic"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter_2",
+      "name": "Advanced Intervals",
+      "description": "Learn more complex intervals and advanced concepts",
+      "difficulty": 3,
+      "prerequisites": ["chapter_1"],
+      "estimated_time": 180,
+      "learning_objectives": [
+        "Master all interval types",
+        "Develop advanced listening skills",
+        "Apply interval knowledge in context"
+      ],
+      "lessons": [
+        {
+          "id": "lesson_2_1",
+          "name": "Second Intervals",
+          "description": "Learn minor and major second intervals",
+          "difficulty": 4,
+          "chapter_id": "chapter_2",
+          "prerequisites": [],
+          "estimated_time": 45,
+          "learning_objectives": [
+            "Identify minor second intervals",
+            "Identify major second intervals",
+            "Distinguish between minor and major seconds"
+          ],
+          "completion_criteria": {
+            "min_score": 80,
+            "min_attempts": 1
+          },
+          "exercises": [
+            "minor_second_major_second_melodic",
+            "minor_second_major_second_harmonic"
+          ]
+        },
+        {
+          "id": "lesson_2_2",
+          "name": "Sixth and Seventh Intervals",
+          "description": "Learn minor and major sixth and seventh intervals",
+          "difficulty": 5,
+          "chapter_id": "chapter_2",
+          "prerequisites": ["lesson_2_1"],
+          "estimated_time": 45,
+          "learning_objectives": [
+            "Identify minor sixth intervals",
+            "Identify major sixth intervals",
+            "Identify minor seventh intervals",
+            "Identify major seventh intervals"
+          ],
+          "completion_criteria": {
+            "min_score": 80,
+            "min_attempts": 1
+          },
+          "exercises": [
+            "sixth_seventh_intervals_melodic",
+            "sixth_seventh_intervals_harmonic"
+          ]
+        },
+        {
+          "id": "lesson_2_3",
+          "name": "Tritone and Chromatic Intervals",
+          "description": "Learn tritone and chromatic interval concepts",
+          "difficulty": 6,
+          "chapter_id": "chapter_2",
+          "prerequisites": ["lesson_2_1", "lesson_2_2"],
+          "estimated_time": 45,
+          "learning_objectives": [
+            "Identify tritone intervals",
+            "Understand chromatic interval concepts",
+            "Apply advanced interval recognition"
+          ],
+          "completion_criteria": {
+            "min_score": 85,
+            "min_attempts": 2
+          },
+          "exercises": [
+            "tritone_chromatic_intervals"
+          ]
+        },
+        {
+          "id": "lesson_2_4",
+          "name": "Mastery Challenge",
+          "description": "Comprehensive interval recognition challenge",
+          "difficulty": 7,
+          "chapter_id": "chapter_2",
+          "prerequisites": ["lesson_2_1", "lesson_2_2", "lesson_2_3"],
+          "estimated_time": 45,
+          "learning_objectives": [
+            "Master all interval types",
+            "Apply interval knowledge under pressure",
+            "Achieve interval recognition mastery"
+          ],
+          "completion_criteria": {
+            "min_score": 90,
+            "min_attempts": 3
+          },
+          "exercises": [
+            "all_intervals_mastery_challenge"
+          ]
+        }
+      ]
+    }
+  ]
+}
