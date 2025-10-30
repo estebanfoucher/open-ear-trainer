@@ -212,3 +212,188 @@ def get_chord_notes_in_octave(chord: list[str], octave: int = 4) -> list[str]:
         List[str]: Chord notes with octave specification
     """
     return [f"{note}-{octave}" for note in chord]
+
+
+def get_suspended_chord(root: str, suspension_type: str) -> list[str]:
+    """
+    Get a suspended chord using mingus.
+
+    Args:
+        root: Root note (e.g., "C", "G", "F#")
+        suspension_type: Type of suspension ("sus2" or "sus4")
+
+    Returns:
+        List[str]: List of notes in the suspended chord
+    """
+    if suspension_type == "sus2":
+        chord_notes = mingus_chords.suspended_second_triad(root)
+    elif suspension_type == "sus4":
+        chord_notes = mingus_chords.suspended_fourth_triad(root)
+    else:
+        # Default to sus4
+        chord_notes = mingus_chords.suspended_fourth_triad(root)
+
+    return [str(note) for note in chord_notes]
+
+
+def get_chord_notes_with_octaves(
+    root: str, chord_type: str, octave: int = 4
+) -> list[str]:
+    """
+    Get chord notes with proper octave handling for audio synthesis using mingus.
+
+    Args:
+        root: Root note (e.g., "C", "G", "F#")
+        chord_type: Type of chord ("major", "minor", "diminished", "augmented", "sus2", "sus4", "3m", "3M")
+        octave: Base octave number
+
+    Returns:
+        List[str]: List of chord notes in format "Note-Octave"
+    """
+    # Get chord notes using mingus
+    if chord_type == "major":
+        chord_notes = mingus_chords.major_triad(root)
+    elif chord_type == "minor":
+        chord_notes = mingus_chords.minor_triad(root)
+    elif chord_type == "diminished":
+        chord_notes = mingus_chords.diminished_triad(root)
+    elif chord_type == "augmented":
+        chord_notes = mingus_chords.augmented_triad(root)
+    elif chord_type == "sus2":
+        chord_notes = mingus_chords.suspended_second_triad(root)
+    elif chord_type == "sus4":
+        chord_notes = mingus_chords.suspended_fourth_triad(root)
+    elif chord_type == "3m":
+        chord_notes = mingus_chords.minor_triad(root)
+    elif chord_type == "3M":
+        chord_notes = mingus_chords.major_triad(root)
+    else:
+        # Default to major
+        chord_notes = mingus_chords.major_triad(root)
+
+    # Convert to string list
+    chord_notes = [str(note) for note in chord_notes]
+
+    # Add octave information for audio synthesis
+    return _add_octaves_to_chord_notes(chord_notes, octave)
+
+
+def get_fifth_quality_chord(
+    root: str, fifth_quality: str, octave: int = 4
+) -> list[str]:
+    """
+    Get a major triad with specific fifth quality (for FifthQualityExercise).
+    This is a specialized function for the fifth quality exercise.
+
+    Args:
+        root: Root note (e.g., "C", "G", "F#")
+        fifth_quality: Fifth quality ("5dim", "5J", or "5aug")
+        octave: Base octave number
+
+    Returns:
+        List[str]: List of chord notes in format "Note-Octave"
+    """
+    # Start with major triad from mingus
+    chord_notes = mingus_chords.major_triad(root)
+    chord_notes = [str(note) for note in chord_notes]
+
+    # Modify the fifth based on quality
+    if fifth_quality == "5dim":
+        # Replace perfect fifth with diminished fifth
+        chord_notes[2] = _get_note_with_interval(root, 6)  # diminished fifth
+    elif fifth_quality == "5aug":
+        # Replace perfect fifth with augmented fifth
+        chord_notes[2] = _get_note_with_interval(root, 8)  # augmented fifth
+    # For "5J", keep the perfect fifth from mingus
+
+    # Add octave information for audio synthesis
+    return _add_octaves_to_chord_notes(chord_notes, octave)
+
+
+def _add_octaves_to_chord_notes(chord_notes: list[str], octave: int) -> list[str]:
+    """
+    Add octave information to chord notes for audio synthesis.
+
+    Args:
+        chord_notes: List of note names without octaves
+        octave: Base octave number
+
+    Returns:
+        List[str]: List of chord notes in format "Note-Octave"
+    """
+
+    # Convert flats to sharps for consistent indexing
+    def normalize_note(note: str) -> str:
+        """Convert flat notes to sharp equivalents."""
+        flat_to_sharp = {"Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#"}
+        return flat_to_sharp.get(note, note)
+
+    note_order = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+    # Normalize all notes to sharps
+    normalized_notes = [normalize_note(note) for note in chord_notes]
+    root = normalized_notes[0]
+    root_index = note_order.index(root)
+
+    # Calculate octaves for each note
+    octaves = [octave] * len(chord_notes)
+
+    for i, note in enumerate(normalized_notes[1:], 1):  # Skip root
+        note_index = note_order.index(note)
+        if note_index < root_index:
+            octaves[i] = octave + 1
+        octaves[i] = max(1, min(7, octaves[i]))
+
+    # Build chord notes with octaves (use original note names, not normalized)
+    return [f"{note}-{octaves[i]}" for i, note in enumerate(chord_notes)]
+
+
+def _get_note_with_interval(root: str, semitones: int) -> str:
+    """
+    Get a note that is a specific number of semitones above the root.
+
+    Args:
+        root: Root note (e.g., "C", "G", "F#")
+        semitones: Number of semitones above root
+
+    Returns:
+        str: Note name
+    """
+
+    # Convert flats to sharps for consistent indexing
+    def normalize_note(note: str) -> str:
+        """Convert flat notes to sharp equivalents."""
+        flat_to_sharp = {"Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#"}
+        return flat_to_sharp.get(note, note)
+
+    note_order = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    normalized_root = normalize_note(root)
+    root_index = note_order.index(normalized_root)
+    target_index = (root_index + semitones) % 12
+    return note_order[target_index]
+
+
+def get_chord_display_name(chord_type: str) -> str:
+    """
+    Get display name for chord type.
+
+    Args:
+        chord_type: Chord type identifier
+
+    Returns:
+        str: Human-readable chord type name
+    """
+    display_names = {
+        "major": "major",
+        "minor": "minor",
+        "diminished": "diminished",
+        "augmented": "augmented",
+        "sus2": "suspended 2nd",
+        "sus4": "suspended 4th",
+        "3m": "minor",
+        "3M": "major",
+        "5dim": "diminished fifth",
+        "5J": "perfect fifth",
+        "5aug": "augmented fifth",
+    }
+    return display_names.get(chord_type, chord_type)

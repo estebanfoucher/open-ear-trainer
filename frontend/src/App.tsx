@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import ChapterList from './components/ChapterList';
+import LessonList from './components/LessonList';
+import ExerciseList from './components/ExerciseList';
+import { renderMarkdown } from './utils/markdown';
 
 interface Exercise {
   id: string;
@@ -24,6 +28,12 @@ interface ExerciseData {
   options: string[];
   correct_answer: string;
   context: any;
+  exercise_metadata?: {
+    id: string;
+    name: string;
+    category: string;
+    description: string;
+  } | null;
 }
 
 interface AnswerResult {
@@ -35,8 +45,123 @@ interface AnswerResult {
   time_taken?: number;
 }
 
+interface Chapter {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  difficulty_level: number;
+  lesson_count: number;
+  exercise_count: number;
+  is_maintenance?: boolean;
+}
+
+interface Lesson {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  learning_objectives: string;
+  estimated_minutes: number;
+  chapter_id: number;
+  chapter_title: string;
+  exercises: CurriculumExercise[];
+}
+
+interface LessonSummary {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  estimated_minutes: number;
+  exercise_count: number;
+}
+
+interface CurriculumExercise {
+  id: number;
+  title: string;
+  description: string;
+  exercise_type: string;
+  order: number;
+  difficulty_level: number;
+  config: any;
+  is_published: boolean;
+}
+
+type ViewType = 'chapters' | 'lessons' | 'exercises' | 'exercise' | 'theory';
+
+// Helper function to get exercise-specific text based on category and exercise ID
+const getExerciseText = (category: string, exerciseId?: string) => {
+  // Check for specific exercise types first
+  if (exerciseId) {
+    if (exerciseId.includes('step_vs_leap')) {
+      return {
+        listenText: 'Listen to the notes',
+        questionText: 'Is this a step or a leap?'
+      };
+    }
+    if (exerciseId.includes('high_or_low')) {
+      return {
+        listenText: 'Listen to the notes',
+        questionText: 'Is the second note higher or lower than the first?'
+      };
+    }
+    if (exerciseId.includes('melodic_shapes')) {
+      return {
+        listenText: 'Listen to the melody',
+        questionText: 'What is the melodic shape?'
+      };
+    }
+    if (exerciseId.includes('triad_fifth_quality')) {
+      return {
+        listenText: 'Listen to the chord',
+        questionText: 'What is the quality of the fifth?'
+      };
+    }
+    if (exerciseId.includes('suspended_chords')) {
+      return {
+        listenText: 'Listen to the chord',
+        questionText: 'What type of chord do you hear?'
+      };
+    }
+  }
+
+  // Fall back to category-based text
+  switch (category) {
+    case 'chords':
+      return {
+        listenText: 'Listen to the chord',
+        questionText: 'Which chord quality do you hear?'
+      };
+    case 'direction':
+      return {
+        listenText: 'Listen to the notes',
+        questionText: 'Is the second note higher or lower than the first?'
+      };
+    case 'tonal_center':
+      return {
+        listenText: 'Listen to the musical phrase',
+        questionText: 'Which note feels like home (tonic)?'
+      };
+    case 'interval_recognition':
+    case 'intervals':
+    default:
+      return {
+        listenText: 'Listen to the interval',
+        questionText: 'Which interval do you hear?'
+      };
+  }
+};
+
 const App: React.FC = () => {
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  // Navigation state
+  const [currentView, setCurrentView] = useState<ViewType>('chapters');
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [lessonsInChapter, setLessonsInChapter] = useState<LessonSummary[]>([]);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+
+  // Exercise state
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [exerciseData, setExerciseData] = useState<ExerciseData | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
@@ -51,21 +176,84 @@ const App: React.FC = () => {
   const [, setQuestionHistory] = useState<Array<{question: number, answer: string, correct: boolean, correctAnswer: string}>>([]);
 
   useEffect(() => {
-    fetchExercises();
+    fetchChapters();
   }, []);
 
-  const fetchExercises = async () => {
+  const fetchChapters = async () => {
     try {
       setLoading(true);
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await axios.get(`${apiUrl}/api/exercises/`);
-      setExercises(response.data);
+      const response = await axios.get(`${apiUrl}/api/chapters/`);
+
+      // Mark specific chapters as maintenance
+      const chaptersWithMaintenance = response.data.map((chapter: Chapter) => ({
+        ...chapter,
+        is_maintenance: chapter.id === 1 || chapter.id === 2
+      }));
+
+      setChapters(chaptersWithMaintenance);
+    } catch (err) {
+      setError('Failed to load chapters');
+      console.error('Error fetching chapters:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectChapter = async (chapterId: number) => {
+    // Check if chapter is in maintenance mode
+    const chapter = chapters.find(c => c.id === chapterId);
+    if (chapter?.is_maintenance) {
+      setError('This chapter is currently under maintenance. Coming soon!');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/chapters/${chapterId}/`);
+      setSelectedChapter(response.data);
+      setLessonsInChapter(response.data.lessons);
+      setCurrentView('lessons');
+    } catch (err) {
+      setError('Failed to load lessons');
+      console.error('Error fetching lessons:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectLesson = async (lessonId: number) => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/lessons/${lessonId}/`);
+      setSelectedLesson(response.data);
+      setCurrentView('exercises');
     } catch (err) {
       setError('Failed to load exercises');
       console.error('Error fetching exercises:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectExercise = (exerciseType: string) => {
+    // Find the exercise in the old registry format
+    const exercise: Exercise = {
+      id: exerciseType,
+      name: exerciseType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: 'Interval recognition exercise',
+      difficulty: 1,
+      category: 'intervals',
+      tags: [],
+      estimated_time: 600,
+      prerequisites: [],
+      learning_objectives: [],
+      input_type: 'multiple_choice',
+      answer_format: 'interval_name',
+    };
+    startExercise(exercise);
   };
 
   const generateExercise = async (exerciseId: string, questionNumber: number = 1) => {
@@ -92,23 +280,6 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // Note: checkAnswer function is available but not used in current implementation
-  // const checkAnswer = async (exerciseId: string, answer: string) => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await axios.post(`/api/exercises/${exerciseId}/check/`, {
-  //       answer: answer,
-  //       context: exerciseData?.context
-  //     });
-  //     setResult(response.data);
-  //   } catch (err) {
-  //     setError('Failed to check answer');
-  //     console.error('Error checking answer:', err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const playAudio = (audioUrl: string) => {
     if (audioUrl) {
@@ -167,6 +338,7 @@ const App: React.FC = () => {
         setScore({correct: 0, total: 0});
         setQuestionHistory([]);
         setSelectedExercise(null);
+        setCurrentView('exercises');
       }
     }, 2000);
   };
@@ -176,7 +348,28 @@ const App: React.FC = () => {
     setCurrentQuestion(1);
     setScore({correct: 0, total: 0});
     setQuestionHistory([]);
+    setCurrentView('exercise');
     generateExercise(exercise.id, 1);
+  };
+
+  const handleBackToChapters = () => {
+    setCurrentView('chapters');
+    setSelectedChapter(null);
+    setLessonsInChapter([]);
+  };
+
+  const handleBackToLessons = () => {
+    setCurrentView('lessons');
+    setSelectedLesson(null);
+  };
+
+  const handleBackToExercises = () => {
+    setCurrentView('exercises');
+    setSelectedExercise(null);
+  };
+
+  const handleOpenTheory = () => {
+    setCurrentView('theory');
   };
 
   return (
@@ -187,28 +380,50 @@ const App: React.FC = () => {
 
       {loading && <div className="loading">Loading...</div>}
 
-      {!selectedExercise ? (
-        <div className="card">
-          <h2>Choose an Exercise</h2>
-          <div className="exercise-list">
-            {exercises.map((exercise) => (
-              <div key={exercise.id} className="card">
-                <h3>{exercise.name}</h3>
-                <p>{exercise.description}</p>
-                <p><strong>Difficulty:</strong> {exercise.difficulty}/10</p>
-                <p><strong>Category:</strong> {exercise.category}</p>
-                <p><strong>Estimated time:</strong> {exercise.estimated_time} seconds</p>
-                <button
-                  className="btn"
-                  onClick={() => startExercise(exercise)}
-                >
-                  Start Exercise (20 Questions)
-                </button>
-              </div>
-            ))}
-          </div>
+      {currentView === 'chapters' && (
+        <ChapterList
+          chapters={chapters}
+          onSelectChapter={handleSelectChapter}
+        />
+      )}
+
+      {currentView === 'lessons' && selectedChapter && (
+        <LessonList
+          chapterTitle={selectedChapter.title}
+          lessons={lessonsInChapter}
+          onSelectLesson={handleSelectLesson}
+          onBack={handleBackToChapters}
+        />
+      )}
+
+      {currentView === 'exercises' && selectedLesson && (
+        <ExerciseList
+          lessonTitle={selectedLesson.title}
+          chapterTitle={selectedLesson.chapter_title}
+          lessonTheoryTitle={(selectedLesson as any).theory_title}
+          lessonTheoryMarkdown={(selectedLesson as any).theory_markdown}
+          exercises={selectedLesson.exercises}
+          onSelectExercise={handleSelectExercise}
+          onOpenTheory={((selectedLesson as any).theory_title || (selectedLesson as any).theory_markdown) ? handleOpenTheory : undefined}
+          onBack={handleBackToLessons}
+        />
+      )}
+
+      {currentView === 'theory' && selectedLesson && (
+        <div className="card" style={{ textAlign: 'left' }}>
+          <button className="btn btn-secondary back-btn" onClick={handleBackToExercises}>
+            ← Back to Exercises
+          </button>
+          <h2>{(selectedLesson as any).theory_title || 'Theory'}</h2>
+          {(selectedLesson as any).theory_markdown ? (
+            <div dangerouslySetInnerHTML={{ __html: renderMarkdown((selectedLesson as any).theory_markdown) }} />
+          ) : (
+            <p>No theory content available.</p>
+          )}
         </div>
-      ) : (
+      )}
+
+      {currentView === 'exercise' && selectedExercise && (
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2>{selectedExercise.name}</h2>
@@ -224,62 +439,63 @@ const App: React.FC = () => {
 
           {exerciseData && (
             <div>
-              <div className="audio-player">
-                <h3>Listen to the interval</h3>
-                <p style={{ color: '#666', marginBottom: '16px' }}>
-                  Two notes will play automatically. Listen carefully!
-                </p>
-                <div className="audio-controls">
-                  {exerciseData.target_audio && (
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => playAudio(exerciseData.target_audio!)}
-                    >
-                      🔄 Play Again
-                    </button>
-                  )}
-                </div>
-              </div>
+              {(() => {
+                const category = exerciseData.exercise_metadata?.category || 'interval_recognition';
+                const exerciseId = exerciseData.exercise_metadata?.id;
+                const exerciseText = getExerciseText(category, exerciseId);
+                return (
+                  <>
+                    <div className="audio-player">
+                      <h3>{exerciseText.listenText}</h3>
+                      <div className="audio-controls">
+                        {exerciseData.target_audio && (
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => playAudio(exerciseData.target_audio!)}
+                          >
+                            🔄 Play Again
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
-              <div>
-                <h3>What interval do you hear?</h3>
-                <div className="exercise-options">
-                  {exerciseData.options.map((option) => (
-                    <button
-                      key={option}
-                      className={`option-btn ${
-                        selectedAnswer === option ? 'selected' : ''
-                      } ${
-                        result ? (
-                          option === exerciseData.correct_answer ? 'correct' :
-                          option === selectedAnswer && !result.is_correct ? 'incorrect' : ''
-                        ) : ''
-                      }`}
-                      onClick={() => handleAnswerClick(option)}
-                      disabled={!!result}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
+                    <div>
+                      <h3>{exerciseText.questionText}</h3>
+                      <div className="exercise-options">
+                        {exerciseData.options.map((option) => (
+                          <button
+                            key={option}
+                            className={`option-btn ${
+                              selectedAnswer === option ? 'selected' : ''
+                            } ${
+                              result ? (
+                                option === exerciseData.correct_answer ? 'correct' :
+                                option === selectedAnswer && !result.is_correct ? 'incorrect' : ''
+                              ) : ''
+                            }`}
+                            onClick={() => handleAnswerClick(option)}
+                            disabled={!!result}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
 
-                {result && (
-                  <div className={`feedback ${result.is_correct ? 'correct' : 'incorrect'}`}>
-                    {result.feedback}
-                  </div>
-                )}
-              </div>
+                      {result && (
+                        <div className={`feedback ${result.is_correct ? 'correct' : 'incorrect'}`}>
+                          {result.feedback}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 
           <button
             className="btn btn-secondary"
-            onClick={() => {
-              setSelectedExercise(null);
-              setCurrentQuestion(1);
-              setScore({correct: 0, total: 0});
-              setQuestionHistory([]);
-            }}
+            onClick={handleBackToExercises}
             style={{ marginTop: '20px' }}
           >
             Back to Exercise List

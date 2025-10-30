@@ -1,0 +1,79 @@
+{
+  "exercises": [
+    {
+      "id": "minor_third_major_third_octave_melodic",
+      "name": "Minor Third, Major Third, Octave (Melodic)",
+      "description": "Learn to identify minor third, major third, and octave intervals with melodic timing",
+      "difficulty": 3,
+      "category": "interval_recognition",
+      "tags": ["intervals", "melodic", "basic"],
+      "estimated_time": 30,
+      "prerequisites": [],
+      "learning_objectives": [
+        "Identify minor third intervals",
+        "Identify major third intervals",
+        "Identify octave intervals"
+      ],
+      "input_type": "multiple_choice",
+      "answer_format": "interval_name",
+      "requires_progression": false,
+      "requires_single_note": true,
+      "audio_duration": 2,
+      "config_options": {
+        "key": "C",
+        "octave": 4
+      }
+    },
+    {
+      "id": "perfect_fourth_fifth_octave_melodic",
+      "name": "Perfect Fourth, Perfect Fifth, Octave (Melodic)",
+      "description": "Learn to identify perfect fourth, perfect fifth, and octave intervals with melodic timing",
+      "difficulty": 4,
+      "category": "interval_recognition",
+      "tags": ["intervals", "melodic", "perfect"],
+      "estimated_time": 35,
+      "prerequisites": ["minor_third_major_third_octave_melodic"],
+      "learning_objectives": [
+        "Identify perfect fourth intervals",
+        "Identify perfect fifth intervals",
+        "Identify octave intervals"
+      ],
+      "input_type": "multiple_choice",
+      "answer_format": "interval_name",
+      "requires_progression": false,
+      "requires_single_note": true,
+      "audio_duration": 2,
+      "config_options": {
+        "key": "C",
+        "octave": 4
+      }
+    },
+    {
+      "id": "combined_intervals_melodic",
+      "name": "Combined Intervals (Melodic)",
+      "description": "Practice identifying all common intervals with melodic timing",
+      "difficulty": 6,
+      "category": "interval_recognition",
+      "tags": ["intervals", "melodic", "advanced", "combined"],
+      "estimated_time": 45,
+      "prerequisites": [
+        "minor_third_major_third_octave_melodic",
+        "perfect_fourth_fifth_octave_melodic"
+      ],
+      "learning_objectives": [
+        "Identify all common intervals",
+        "Distinguish between similar intervals",
+        "Apply interval recognition skills"
+      ],
+      "input_type": "multiple_choice",
+      "answer_format": "interval_name",
+      "requires_progression": false,
+      "requires_single_note": true,
+      "audio_duration": 2,
+      "config_options": {
+        "key": "C",
+        "octave": 4
+      }
+    }
+  ]
+}

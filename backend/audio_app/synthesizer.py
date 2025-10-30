@@ -200,8 +200,8 @@ class AudioSynthesizer:
             )
             os.close(fd)
 
-        # Create placeholder WAV file
-        self._create_placeholder_wav(output_path, duration)
+        # Create chord WAV file with multiple notes
+        self._create_synthetic_chord_wav(output_path, chord_notes, duration)
 
         # Cache the result
         if self.cache_enabled:
@@ -1045,6 +1045,51 @@ class AudioSynthesizer:
             audio = audio / np.max(np.abs(audio)) * 0.7
 
         return audio
+
+    def _create_synthetic_chord_wav(
+        self, output_path: str, chord_notes: list[str], duration: float
+    ):
+        """Create chord WAV file using synthetic piano sounds."""
+        import wave
+
+        import numpy as np
+
+        # Audio parameters
+        sample_rate = 44100
+        total_samples = int(sample_rate * duration)
+
+        # Generate time array
+        t = np.linspace(0, duration, total_samples, False)
+
+        # Generate audio for each note in the chord
+        combined_audio = np.zeros(total_samples)
+
+        for note in chord_notes:
+            # Convert note to frequency
+            frequency = self._note_to_frequency(note)
+
+            # Generate piano-like tone for this note
+            note_audio = self._generate_piano_tone(frequency, t)
+
+            # Add to combined audio
+            combined_audio += note_audio
+
+        # Average to prevent clipping (divide by number of notes)
+        combined_audio = combined_audio / len(chord_notes)
+
+        # Convert to 16-bit integers
+        audio_data = (combined_audio * 32767).astype(np.int16)
+
+        # Write WAV file
+        with wave.open(output_path, "w") as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit
+            wav_file.setframerate(sample_rate)
+            wav_file.writeframes(audio_data.tobytes())
+
+        logger.info(
+            f"Created synthetic chord WAV file: {output_path} with notes: {chord_notes}"
+        )
 
     def get_audio_url(self, audio_path: str) -> str:
         """

@@ -35,4 +35,16 @@ urlpatterns = [
     ),
     # Audio endpoints
     path("audio/<str:filename>/", views.AudioFileView.as_view(), name="audio-file"),
+    # Curriculum navigation endpoints
+    path("chapters/", views.ChapterListView.as_view(), name="chapter-list"),
+    path(
+        "chapters/<int:chapter_id>/",
+        views.ChapterDetailView.as_view(),
+        name="chapter-detail",
+    ),
+    path(
+        "lessons/<int:lesson_id>/",
+        views.LessonDetailView.as_view(),
+        name="lesson-detail",
+    ),
 ]

@@ -19,6 +19,10 @@ class ExerciseListSerializer(serializers.Serializer):
     learning_objectives = serializers.ListField(child=serializers.CharField())
     input_type = serializers.CharField()
     answer_format = serializers.CharField()
+    requires_progression = serializers.BooleanField()
+    requires_single_note = serializers.BooleanField()
+    audio_duration = serializers.IntegerField()
+    config_options = serializers.DictField()
 
 
 class ExerciseDataSerializer(serializers.Serializer):
@@ -31,12 +35,13 @@ class ExerciseDataSerializer(serializers.Serializer):
     options = serializers.ListField()
     correct_answer = serializers.CharField()
     context = serializers.DictField()
+    exercise_metadata = serializers.DictField(allow_null=True, required=False)
 
 
 class AnswerCheckSerializer(serializers.Serializer):
     """Serializer for answer check requests."""
 
-    answer = serializers.CharField()
+    answer = serializers.CharField(allow_blank=True)
 
 
 class AnswerResultSerializer(serializers.Serializer):
@@ -47,7 +52,7 @@ class AnswerResultSerializer(serializers.Serializer):
     correct_answer = serializers.CharField()
     feedback = serializers.CharField()
     hints_used = serializers.ListField(child=serializers.CharField(), required=False)
-    time_taken = serializers.IntegerField(required=False)
+    time_taken = serializers.IntegerField(required=False, allow_null=True)
 
 
 class ExerciseGenerateSerializer(serializers.Serializer):
@@ -65,3 +70,137 @@ class ErrorSerializer(serializers.Serializer):
     error = serializers.CharField()
     message = serializers.CharField()
     details = serializers.DictField(required=False)
+
+
+# Curriculum Structure Serializers
+
+
+class ExerciseSerializer(serializers.ModelSerializer):
+    """Serializer for Exercise model."""
+
+    class Meta:
+        from .models import Exercise
+
+        model = Exercise
+        fields = [
+            "id",
+            "title",
+            "description",
+            "exercise_type",
+            "order",
+            "difficulty_level",
+            "config",
+            "is_published",
+        ]
+
+
+class LessonListSerializer(serializers.ModelSerializer):
+    """Serializer for Lesson list in chapter detail."""
+
+    exercise_count = serializers.SerializerMethodField()
+    has_theory = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import Lesson
+
+        model = Lesson
+        fields = [
+            "id",
+            "title",
+            "description",
+            "order",
+            "estimated_minutes",
+            "exercise_count",
+            "has_theory",
+        ]
+
+    def get_exercise_count(self, obj):
+        """Get count of published exercises in this lesson."""
+        return obj.exercises.filter(is_published=True).count()
+
+    def get_has_theory(self, obj):
+        return bool((obj.theory_title or obj.theory_markdown).strip())
+
+
+class LessonDetailSerializer(serializers.ModelSerializer):
+    """Serializer for Lesson detail with exercises."""
+
+    exercises = ExerciseSerializer(many=True, read_only=True)
+    chapter_id = serializers.IntegerField(source="chapter.id", read_only=True)
+    chapter_title = serializers.CharField(source="chapter.title", read_only=True)
+
+    class Meta:
+        from .models import Lesson
+
+        model = Lesson
+        fields = [
+            "id",
+            "title",
+            "description",
+            "order",
+            "learning_objectives",
+            "estimated_minutes",
+            "theory_title",
+            "theory_markdown",
+            "chapter_id",
+            "chapter_title",
+            "exercises",
+        ]
+
+
+class ChapterListSerializer(serializers.ModelSerializer):
+    """Serializer for Chapter list."""
+
+    lesson_count = serializers.SerializerMethodField()
+    exercise_count = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import Chapter
+
+        model = Chapter
+        fields = [
+            "id",
+            "title",
+            "description",
+            "order",
+            "difficulty_level",
+            "lesson_count",
+            "exercise_count",
+        ]
+
+    def get_lesson_count(self, obj):
+        """Get count of published lessons in this chapter."""
+        return obj.lessons.filter(is_published=True).count()
+
+    def get_exercise_count(self, obj):
+        """Get total count of published exercises in this chapter."""
+        from .models import Exercise
+
+        return Exercise.objects.filter(lesson__chapter=obj, is_published=True).count()
+
+
+class ChapterDetailSerializer(serializers.ModelSerializer):
+    """Serializer for Chapter detail with lessons (published only)."""
+
+    lessons = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import Chapter
+
+        model = Chapter
+        fields = [
+            "id",
+            "title",
+            "description",
+            "order",
+            "difficulty_level",
+            "lessons",
+        ]
+
+    def get_lessons(self, obj):
+        from .models import Lesson
+
+        published_lessons = Lesson.objects.filter(
+            chapter=obj, is_published=True
+        ).order_by("order")
+        return LessonListSerializer(published_lessons, many=True).data
