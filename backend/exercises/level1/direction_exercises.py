@@ -44,11 +44,27 @@ class HighOrLowDirectionExercise(BaseExercise):
     )
 
     def generate(self, **kwargs) -> ExerciseData:
-        """Generate two tones with clear direction."""
+        """Generate two tones with clear direction.
+
+        Balanced per-session behavior:
+        - If "direction" provided in kwargs, use it directly.
+        - Else if (session_id and question_number) provided, generate a balanced pool
+          of size total_questions (defaulting to max(question_number, 2)). The pool
+          contains an even split of "higher"/"lower" (off-by-one goes to "higher").
+          Shuffle deterministically using a seed derived from session_id, then pick
+          entry at index question_number-1.
+        - Else fall back to weighted probabilities.
+        """
         octave_range = kwargs.get("octave_range", 2)
         note_duration = kwargs.get("note_duration", 1.0)
 
-        # Custom probabilities for direction
+        # Inputs that control balanced selection
+        explicit_direction = kwargs.get("direction")
+        session_id = kwargs.get("session_id")
+        question_number = kwargs.get("question_number")
+        total_questions = kwargs.get("total_questions")
+
+        # Custom probabilities for direction (fallback)
         direction_probabilities = kwargs.get(
             "direction_probabilities",
             {
@@ -61,8 +77,36 @@ class HighOrLowDirectionExercise(BaseExercise):
         base_note = random.choice(["C", "D", "E", "F", "G", "A", "B"])
         base_octave = random.randint(4, 5)
 
-        # Generate second note with weighted direction choice
-        direction = self.weighted_choice(direction_probabilities)
+        # Determine direction
+        direction: str
+        if isinstance(explicit_direction, str) and explicit_direction:
+            direction = explicit_direction.lower()
+        elif session_id is not None and question_number is not None:
+            # Deterministic balanced pool per session
+            try:
+                qn = int(question_number)
+            except (TypeError, ValueError):
+                qn = 1
+            try:
+                tq = int(total_questions) if total_questions is not None else max(qn, 2)
+            except (TypeError, ValueError):
+                tq = max(qn, 2)
+
+            # Build balanced pool
+            num_higher = (tq + 1) // 2
+            num_lower = tq // 2
+            pool = ["higher"] * num_higher + ["lower"] * num_lower
+
+            # Deterministic shuffle based on session_id
+            seed_value = f"high_or_low::{session_id}::{tq}"
+            rng = random.Random(seed_value)
+            rng.shuffle(pool)
+
+            index = (max(qn, 1) - 1) % len(pool)
+            direction = pool[index]
+        else:
+            # Fallback to weighted random choice
+            direction = self.weighted_choice(direction_probabilities)
 
         if direction == "higher":
             # Second note is higher
