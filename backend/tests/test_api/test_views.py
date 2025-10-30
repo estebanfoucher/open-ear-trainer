@@ -241,16 +241,19 @@ class TestExerciseGenerateView(APITestCase):
 
     def test_exercise_generate_get_with_mock_exercise(self):
         """Test exercise generation with mocked exercise."""
+        from types import SimpleNamespace
+
         with patch("api_app.views.exercise_registry") as mock_registry:
             mock_exercise = MagicMock()
-            mock_exercise_data = MagicMock()
-            mock_exercise_data.key = "C major"
-            mock_exercise_data.scale = ["C", "D", "E", "F", "G", "A", "B"]
-            mock_exercise_data.progression_audio = None
-            mock_exercise_data.target_audio = "/api/audio/test.wav"
-            mock_exercise_data.options = ["minor_third", "major_third", "octave"]
-            mock_exercise_data.correct_answer = "major_third"
-            mock_exercise_data.context = {"root_note": "C-4"}
+            mock_exercise_data = SimpleNamespace(
+                key="C major",
+                scale=["C", "D", "E", "F", "G", "A", "B"],
+                progression_audio=None,
+                target_audio="/api/audio/test.wav",
+                options=["minor_third", "major_third", "octave"],
+                correct_answer="major_third",
+                context={"root_note": "C-4"},
+            )
 
             mock_exercise.generate.return_value = mock_exercise_data
             mock_registry.get_exercise.return_value = mock_exercise

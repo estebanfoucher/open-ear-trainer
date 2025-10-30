@@ -35,7 +35,7 @@ class ExerciseDataSerializer(serializers.Serializer):
     options = serializers.ListField()
     correct_answer = serializers.CharField()
     context = serializers.DictField()
-    exercise_metadata = serializers.DictField(allow_null=True)
+    exercise_metadata = serializers.DictField(allow_null=True, required=False)
 
 
 class AnswerCheckSerializer(serializers.Serializer):

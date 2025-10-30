@@ -2,7 +2,10 @@
 Django models for curriculum structure: Chapters, Lessons, and Exercises.
 """
 
+from typing import ClassVar
+
 from django.db import models
+from django.db.models.manager import Manager as DjangoManager
 
 
 class Chapter(models.Model):
@@ -22,6 +25,9 @@ class Chapter(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # Explicit manager for type checkers
+    objects: ClassVar[DjangoManager["Chapter"]] = models.Manager()
 
     class Meta:
         ordering = ["order"]
@@ -58,6 +64,9 @@ class Lesson(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # Explicit manager for type checkers
+    objects: ClassVar[DjangoManager["Lesson"]] = models.Manager()
 
     class Meta:
         ordering = ["chapter", "order"]
@@ -100,6 +109,9 @@ class Exercise(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # Explicit manager for type checkers
+    objects: ClassVar[DjangoManager["Exercise"]] = models.Manager()
 
     class Meta:
         ordering = ["lesson", "order"]
