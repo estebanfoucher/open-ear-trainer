@@ -56,4 +56,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8000}/health/ || exit 1
 
 # Run the application
-CMD ["sh", "-c", "cd backend && . ../.venv/bin/activate && python manage.py migrate && python manage.py runserver 0.0.0.0:${PORT:-8000}"]
+CMD ["sh", "-c", "cd backend && . ../.venv/bin/activate && python manage.py migrate --noinput && python manage.py seed_curriculum && python manage.py runserver 0.0.0.0:${PORT:-8000}"]
