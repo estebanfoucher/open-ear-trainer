@@ -257,6 +257,13 @@ class TestExerciseGenerateView(APITestCase):
 
             mock_exercise.generate.return_value = mock_exercise_data
             mock_registry.get_exercise.return_value = mock_exercise
+            # Ensure metadata is a plain object (not MagicMock)
+            mock_registry.get_exercise_metadata.return_value = SimpleNamespace(
+                id="test_exercise",
+                name="Test Exercise",
+                category="interval_recognition",
+                description="",
+            )
 
             url = reverse(
                 "api:exercise-generate", kwargs={"exercise_id": "test_exercise"}
