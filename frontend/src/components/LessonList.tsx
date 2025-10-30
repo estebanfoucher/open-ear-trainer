@@ -5,8 +5,8 @@ interface Lesson {
   title: string;
   description: string;
   order: number;
-  estimated_minutes: number;
   exercise_count: number;
+  has_theory?: boolean;
 }
 
 interface LessonListProps {
@@ -30,8 +30,8 @@ const LessonList: React.FC<LessonListProps> = ({ chapterTitle, lessons, onSelect
             <h3>{lesson.title}</h3>
             <p className="description">{lesson.description}</p>
             <div className="lesson-info">
-              <span>⏱️ {lesson.estimated_minutes} min</span>
-              <span>✏️ {lesson.exercise_count} exercises</span>
+              <span>✏️ {lesson.exercise_count} {lesson.exercise_count === 1 ? 'exercise' : 'exercises'}</span>
+              <span>📘 {lesson.has_theory ? 1 : 0} {lesson.has_theory ? 'theory module' : 'theory modules'}</span>
             </div>
             <button
               className="btn"

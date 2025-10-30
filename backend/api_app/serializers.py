@@ -35,6 +35,7 @@ class ExerciseDataSerializer(serializers.Serializer):
     options = serializers.ListField()
     correct_answer = serializers.CharField()
     context = serializers.DictField()
+    exercise_metadata = serializers.DictField(allow_null=True)
 
 
 class AnswerCheckSerializer(serializers.Serializer):
@@ -97,6 +98,7 @@ class LessonListSerializer(serializers.ModelSerializer):
     """Serializer for Lesson list in chapter detail."""
 
     exercise_count = serializers.SerializerMethodField()
+    has_theory = serializers.SerializerMethodField()
 
     class Meta:
         from .models import Lesson
@@ -109,11 +111,15 @@ class LessonListSerializer(serializers.ModelSerializer):
             "order",
             "estimated_minutes",
             "exercise_count",
+            "has_theory",
         ]
 
     def get_exercise_count(self, obj):
         """Get count of published exercises in this lesson."""
         return obj.exercises.filter(is_published=True).count()
+
+    def get_has_theory(self, obj):
+        return bool((obj.theory_title or obj.theory_markdown).strip())
 
 
 class LessonDetailSerializer(serializers.ModelSerializer):
@@ -134,6 +140,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             "order",
             "learning_objectives",
             "estimated_minutes",
+            "theory_title",
+            "theory_markdown",
             "chapter_id",
             "chapter_title",
             "exercises",
@@ -172,9 +180,9 @@ class ChapterListSerializer(serializers.ModelSerializer):
 
 
 class ChapterDetailSerializer(serializers.ModelSerializer):
-    """Serializer for Chapter detail with lessons."""
+    """Serializer for Chapter detail with lessons (published only)."""
 
-    lessons = LessonListSerializer(many=True, read_only=True)
+    lessons = serializers.SerializerMethodField()
 
     class Meta:
         from .models import Chapter
@@ -188,3 +196,11 @@ class ChapterDetailSerializer(serializers.ModelSerializer):
             "difficulty_level",
             "lessons",
         ]
+
+    def get_lessons(self, obj):
+        from .models import Lesson
+
+        published_lessons = Lesson.objects.filter(
+            chapter=obj, is_published=True
+        ).order_by("order")
+        return LessonListSerializer(published_lessons, many=True).data

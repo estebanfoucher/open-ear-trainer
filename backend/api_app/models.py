@@ -44,6 +44,9 @@ class Lesson(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     order = models.IntegerField(default=0, help_text="Display order within chapter")
+    # Lesson theory content
+    theory_title = models.CharField(max_length=200, blank=True, default="")
+    theory_markdown = models.TextField(blank=True, default="")
     learning_objectives = models.TextField(
         blank=True, help_text="What the user will learn"
     )

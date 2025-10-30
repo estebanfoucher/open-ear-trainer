@@ -222,6 +222,9 @@ class ExerciseGenerateView(APIView):
             exercise = exercise_class
             exercise_data = exercise.generate(**config)
 
+            # Get exercise metadata
+            metadata = exercise_registry.get_exercise_metadata(exercise_id)
+
             # Convert to dict for serialization
             data_dict = {
                 "key": exercise_data.key,
@@ -231,6 +234,14 @@ class ExerciseGenerateView(APIView):
                 "options": exercise_data.options,
                 "correct_answer": exercise_data.correct_answer,
                 "context": exercise_data.context,
+                "exercise_metadata": {
+                    "id": metadata.id if metadata else exercise_id,
+                    "name": metadata.name if metadata else exercise_id,
+                    "category": metadata.category if metadata else "unknown",
+                    "description": metadata.description if metadata else "",
+                }
+                if metadata
+                else None,
             }
 
             serializer = ExerciseDataSerializer(data=data_dict)

@@ -27,6 +27,12 @@ interface ExerciseData {
   options: string[];
   correct_answer: string;
   context: any;
+  exercise_metadata?: {
+    id: string;
+    name: string;
+    category: string;
+    description: string;
+  } | null;
 }
 
 interface AnswerResult {
@@ -46,6 +52,7 @@ interface Chapter {
   difficulty_level: number;
   lesson_count: number;
   exercise_count: number;
+  is_maintenance?: boolean;
 }
 
 interface Lesson {
@@ -80,7 +87,70 @@ interface CurriculumExercise {
   is_published: boolean;
 }
 
-type ViewType = 'chapters' | 'lessons' | 'exercises' | 'exercise';
+type ViewType = 'chapters' | 'lessons' | 'exercises' | 'exercise' | 'theory';
+
+// Helper function to get exercise-specific text based on category and exercise ID
+const getExerciseText = (category: string, exerciseId?: string) => {
+  // Check for specific exercise types first
+  if (exerciseId) {
+    if (exerciseId.includes('step_vs_leap')) {
+      return {
+        listenText: 'Listen to the notes',
+        questionText: 'Is this a step or a leap?'
+      };
+    }
+    if (exerciseId.includes('high_or_low')) {
+      return {
+        listenText: 'Listen to the notes',
+        questionText: 'Is the second note higher or lower than the first?'
+      };
+    }
+    if (exerciseId.includes('melodic_shapes')) {
+      return {
+        listenText: 'Listen to the melody',
+        questionText: 'What is the melodic shape?'
+      };
+    }
+    if (exerciseId.includes('triad_fifth_quality')) {
+      return {
+        listenText: 'Listen to the chord',
+        questionText: 'What is the quality of the fifth?'
+      };
+    }
+    if (exerciseId.includes('suspended_chords')) {
+      return {
+        listenText: 'Listen to the chord',
+        questionText: 'What type of chord do you hear?'
+      };
+    }
+  }
+
+  // Fall back to category-based text
+  switch (category) {
+    case 'chords':
+      return {
+        listenText: 'Listen to the chord',
+        questionText: 'Which chord quality do you hear?'
+      };
+    case 'direction':
+      return {
+        listenText: 'Listen to the notes',
+        questionText: 'Is the second note higher or lower than the first?'
+      };
+    case 'tonal_center':
+      return {
+        listenText: 'Listen to the musical phrase',
+        questionText: 'Which note feels like home (tonic)?'
+      };
+    case 'interval_recognition':
+    case 'intervals':
+    default:
+      return {
+        listenText: 'Listen to the interval',
+        questionText: 'Which interval do you hear?'
+      };
+  }
+};
 
 const App: React.FC = () => {
   // Navigation state
@@ -113,7 +183,14 @@ const App: React.FC = () => {
       setLoading(true);
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       const response = await axios.get(`${apiUrl}/api/chapters/`);
-      setChapters(response.data);
+
+      // Mark specific chapters as maintenance
+      const chaptersWithMaintenance = response.data.map((chapter: Chapter) => ({
+        ...chapter,
+        is_maintenance: chapter.id === 1 || chapter.id === 2 // Direction & Contour, Tonal Center & Scale Sense
+      }));
+
+      setChapters(chaptersWithMaintenance);
     } catch (err) {
       setError('Failed to load chapters');
       console.error('Error fetching chapters:', err);
@@ -123,6 +200,13 @@ const App: React.FC = () => {
   };
 
   const handleSelectChapter = async (chapterId: number) => {
+    // Check if chapter is in maintenance mode
+    const chapter = chapters.find(c => c.id === chapterId);
+    if (chapter?.is_maintenance) {
+      setError('This chapter is currently under maintenance. Coming soon!');
+      return;
+    }
+
     try {
       setLoading(true);
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -283,6 +367,10 @@ const App: React.FC = () => {
     setSelectedExercise(null);
   };
 
+  const handleOpenTheory = () => {
+    setCurrentView('theory');
+  };
+
   return (
     <div className="container">
       <h1>🎵 Musical Ear Trainer</h1>
@@ -311,10 +399,27 @@ const App: React.FC = () => {
         <ExerciseList
           lessonTitle={selectedLesson.title}
           chapterTitle={selectedLesson.chapter_title}
+          lessonTheoryTitle={(selectedLesson as any).theory_title}
+          lessonTheoryMarkdown={(selectedLesson as any).theory_markdown}
           exercises={selectedLesson.exercises}
           onSelectExercise={handleSelectExercise}
+          onOpenTheory={((selectedLesson as any).theory_title || (selectedLesson as any).theory_markdown) ? handleOpenTheory : undefined}
           onBack={handleBackToLessons}
         />
+      )}
+
+      {currentView === 'theory' && selectedLesson && (
+        <div className="card" style={{ textAlign: 'left' }}>
+          <button className="btn btn-secondary back-btn" onClick={handleBackToExercises}>
+            ← Back to Exercises
+          </button>
+          <h2>{(selectedLesson as any).theory_title || 'Theory'}</h2>
+          {(selectedLesson as any).theory_markdown ? (
+            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{(selectedLesson as any).theory_markdown}</pre>
+          ) : (
+            <p>No theory content available.</p>
+          )}
+        </div>
       )}
 
       {currentView === 'exercise' && selectedExercise && (
@@ -333,51 +438,57 @@ const App: React.FC = () => {
 
           {exerciseData && (
             <div>
-              <div className="audio-player">
-                <h3>Listen to the interval</h3>
-                <p style={{ color: '#666', marginBottom: '16px' }}>
-                  Two notes will play automatically. Listen carefully!
-                </p>
-                <div className="audio-controls">
-                  {exerciseData.target_audio && (
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => playAudio(exerciseData.target_audio!)}
-                    >
-                      🔄 Play Again
-                    </button>
-                  )}
-                </div>
-              </div>
+              {(() => {
+                const category = exerciseData.exercise_metadata?.category || 'interval_recognition';
+                const exerciseId = exerciseData.exercise_metadata?.id;
+                const exerciseText = getExerciseText(category, exerciseId);
+                return (
+                  <>
+                    <div className="audio-player">
+                      <h3>{exerciseText.listenText}</h3>
+                      <div className="audio-controls">
+                        {exerciseData.target_audio && (
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => playAudio(exerciseData.target_audio!)}
+                          >
+                            🔄 Play Again
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
-              <div>
-                <h3>What interval do you hear?</h3>
-                <div className="exercise-options">
-                  {exerciseData.options.map((option) => (
-                    <button
-                      key={option}
-                      className={`option-btn ${
-                        selectedAnswer === option ? 'selected' : ''
-                      } ${
-                        result ? (
-                          option === exerciseData.correct_answer ? 'correct' :
-                          option === selectedAnswer && !result.is_correct ? 'incorrect' : ''
-                        ) : ''
-                      }`}
-                      onClick={() => handleAnswerClick(option)}
-                      disabled={!!result}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
+                    <div>
+                      <h3>{exerciseText.questionText}</h3>
+                      <div className="exercise-options">
+                        {exerciseData.options.map((option) => (
+                          <button
+                            key={option}
+                            className={`option-btn ${
+                              selectedAnswer === option ? 'selected' : ''
+                            } ${
+                              result ? (
+                                option === exerciseData.correct_answer ? 'correct' :
+                                option === selectedAnswer && !result.is_correct ? 'incorrect' : ''
+                              ) : ''
+                            }`}
+                            onClick={() => handleAnswerClick(option)}
+                            disabled={!!result}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
 
-                {result && (
-                  <div className={`feedback ${result.is_correct ? 'correct' : 'incorrect'}`}>
-                    {result.feedback}
-                  </div>
-                )}
-              </div>
+                      {result && (
+                        <div className={`feedback ${result.is_correct ? 'correct' : 'incorrect'}`}>
+                          {result.feedback}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 

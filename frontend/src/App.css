@@ -27,3 +27,39 @@
   margin-top: 16px;
   width: 100%;
 }
+
+/* Maintenance chapter styles */
+.chapter-card.maintenance {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+}
+
+.maintenance-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.maintenance-badge {
+  background-color: #ffc107;
+  color: #856404;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.btn-disabled {
+  background-color: #6c757d;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-disabled:hover {
+  background-color: #6c757d;
+  transform: none;
+}

@@ -156,71 +156,30 @@ class Command(BaseCommand):
             chapter=chapter3,
             order=1,
             defaults={
-                "title": "Melodic Intervals: Thirds and Octave",
-                "description": "Learn to identify melodic minor thirds, major thirds, and octaves.",
-                "learning_objectives": "Recognize melodic intervals by ear",
-                "estimated_minutes": 15,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_1.title}"))
-
-        lesson3_2, created = Lesson.objects.get_or_create(
-            chapter=chapter3,
-            order=2,
-            defaults={
-                "title": "Melodic Intervals: Perfect Fourths, Fifths, and Octave",
-                "description": "Learn to identify perfect fourths, fifths, and octaves melodically.",
-                "learning_objectives": "Recognize perfect intervals by ear",
-                "estimated_minutes": 15,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_2.title}"))
-
-        lesson3_3, created = Lesson.objects.get_or_create(
-            chapter=chapter3,
-            order=3,
-            defaults={
-                "title": "Harmonic Intervals: Thirds and Octave",
-                "description": "Learn to identify minor thirds, major thirds, and octaves played harmonically.",
-                "learning_objectives": "Recognize harmonic intervals by ear",
-                "estimated_minutes": 15,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_3.title}"))
-
-        lesson3_4, created = Lesson.objects.get_or_create(
-            chapter=chapter3,
-            order=4,
-            defaults={
-                "title": "Harmonic Intervals: Perfect Fourths, Fifths, and Octave",
-                "description": "Learn to identify perfect fourths, fifths, and octaves played harmonically.",
-                "learning_objectives": "Recognize perfect harmonic intervals by ear",
-                "estimated_minutes": 15,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_4.title}"))
-
-        lesson3_5, created = Lesson.objects.get_or_create(
-            chapter=chapter3,
-            order=5,
-            defaults={
-                "title": "Combined Interval Recognition",
-                "description": "Practice identifying all learned intervals together.",
-                "learning_objectives": "Master interval recognition across all learned intervals",
+                "title": "First intervals",
+                "description": "Learn to identify widely used intervals by ear",
+                "learning_objectives": "Recognize 3m, 3M, 4P, 5P, 8P. As melody or harmonic sounds.",
                 "estimated_minutes": 20,
                 "is_published": True,
             },
         )
         if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_5.title}"))
+            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_1.title}"))
+        # Ensure theory content for intervals basic lesson
+        if not (lesson3_1.theory_title or lesson3_1.theory_markdown):
+            lesson3_1.theory_title = "Intervals 101"
+            lesson3_1.theory_markdown = (
+                "# Intervals 101\n\n"
+                "An interval is the distance between two notes. In the major scale, the degrees are: "
+                "1 (Do), 2 (Re), 3 (Mi), 4 (Fa), 5 (Sol), 6 (La), 7 (Ti).\n\n"
+                "Key definitions:\n\n"
+                "- Minor Third (m3): three semitones (e.g., C → Eb)\n"
+                "- Major Third (M3): four semitones (e.g., C → E)\n"
+                "- Perfect Fourth (P4): five semitones (e.g., C → F)\n"
+                "- Perfect Fifth (P5): seven semitones (e.g., C → G)\n\n"
+                "You'll now practice identifying these intervals."
+            )
+            lesson3_1.save(update_fields=["theory_title", "theory_markdown"])
 
         # Chapter 4 Lessons
         lesson4_1, created = Lesson.objects.get_or_create(
@@ -401,9 +360,9 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Created Exercise: {exercise3_1_1.title}")
             )
 
-        exercise3_2_1, created = Exercise.objects.get_or_create(
-            lesson=lesson3_2,
-            order=1,
+        exercise3_1_2, created = Exercise.objects.get_or_create(
+            lesson=lesson3_1,
+            order=2,
             defaults={
                 "exercise_type": "perfect_fourth_fifth_octave_melodic",
                 "title": "Perfect Fourth, Perfect Fifth, and Octave (Melodic)",
@@ -415,12 +374,12 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise3_2_1.title}")
+                self.style.SUCCESS(f"Created Exercise: {exercise3_1_2.title}")
             )
 
-        exercise3_3_1, created = Exercise.objects.get_or_create(
-            lesson=lesson3_3,
-            order=1,
+        exercise3_1_3, created = Exercise.objects.get_or_create(
+            lesson=lesson3_1,
+            order=3,
             defaults={
                 "exercise_type": "minor_third_major_third_octave_harmonic",
                 "title": "Minor Third, Major Third, and Octave (Harmonic)",
@@ -432,12 +391,12 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise3_3_1.title}")
+                self.style.SUCCESS(f"Created Exercise: {exercise3_1_3.title}")
             )
 
-        exercise3_4_1, created = Exercise.objects.get_or_create(
-            lesson=lesson3_4,
-            order=1,
+        exercise3_1_4, created = Exercise.objects.get_or_create(
+            lesson=lesson3_1,
+            order=4,
             defaults={
                 "exercise_type": "perfect_fourth_fifth_octave_harmonic",
                 "title": "Perfect Fourth, Perfect Fifth, and Octave (Harmonic)",
@@ -449,12 +408,12 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise3_4_1.title}")
+                self.style.SUCCESS(f"Created Exercise: {exercise3_1_4.title}")
             )
 
-        exercise3_5_1, created = Exercise.objects.get_or_create(
-            lesson=lesson3_5,
-            order=1,
+        exercise3_1_5, created = Exercise.objects.get_or_create(
+            lesson=lesson3_1,
+            order=5,
             defaults={
                 "exercise_type": "combined_intervals_melodic",
                 "title": "Combined Melodic Intervals",
@@ -466,7 +425,7 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise3_5_1.title}")
+                self.style.SUCCESS(f"Created Exercise: {exercise3_1_5.title}")
             )
 
         # Chapter 4 Exercises

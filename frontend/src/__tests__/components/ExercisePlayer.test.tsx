@@ -15,28 +15,64 @@ const ExercisePlayer = ({
   exerciseData: any,
   onPlayAudio: (audioUrl: string) => void,
   isPlaying?: boolean
-}) => (
-  <div data-testid="exercise-player">
-    <div className="audio-player">
-      <h3>Listen to the interval</h3>
-      <p style={{ color: '#666', marginBottom: '16px' }}>
-        Two notes will play automatically. Listen carefully!
-      </p>
-      <div className="audio-controls">
-        {exerciseData.target_audio && (
-          <button
-            className="btn btn-secondary"
-            onClick={() => onPlayAudio(exerciseData.target_audio)}
-            data-testid="play-again-button"
-            disabled={isPlaying}
-          >
-            🔄 Play Again
-          </button>
-        )}
+}) => {
+  const category = exerciseData.exercise_metadata?.category || 'interval_recognition';
+  const exerciseId = exerciseData.exercise_metadata?.id;
+  const getExerciseText = (category: string, exerciseId?: string) => {
+    // Check for specific exercise types first
+    if (exerciseId) {
+      if (exerciseId.includes('step_vs_leap')) {
+        return 'Listen to the notes';
+      }
+      if (exerciseId.includes('high_or_low')) {
+        return 'Listen to the notes';
+      }
+      if (exerciseId.includes('melodic_shapes')) {
+        return 'Listen to the melody';
+      }
+      if (exerciseId.includes('triad_fifth_quality')) {
+        return 'Listen to the chord';
+      }
+      if (exerciseId.includes('suspended_chords')) {
+        return 'Listen to the chord';
+      }
+    }
+
+    // Fall back to category-based text
+    switch (category) {
+      case 'chords':
+        return 'Listen to the chord';
+      case 'direction':
+        return 'Listen to the notes';
+      case 'tonal_center':
+        return 'Listen to the musical phrase';
+      case 'interval_recognition':
+      case 'intervals':
+      default:
+        return 'Listen to the interval';
+    }
+  };
+
+  return (
+    <div data-testid="exercise-player">
+      <div className="audio-player">
+        <h3>{getExerciseText(category, exerciseId)}</h3>
+        <div className="audio-controls">
+          {exerciseData.target_audio && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => onPlayAudio(exerciseData.target_audio)}
+              data-testid="play-again-button"
+              disabled={isPlaying}
+            >
+              🔄 Play Again
+            </button>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 describe('ExercisePlayer Component', () => {
   beforeEach(() => {
@@ -61,7 +97,6 @@ describe('ExercisePlayer Component', () => {
 
     render(<ExercisePlayer exerciseData={mockExerciseData} onPlayAudio={onPlayAudio} />);
 
-    expect(screen.getByText('Two notes will play automatically. Listen carefully!')).toBeInTheDocument();
   });
 
   it('shows play again button when audio is available', () => {
@@ -199,7 +234,6 @@ describe('ExercisePlayer Component', () => {
     // This test documents expected behavior for loading states
     render(<ExercisePlayer exerciseData={mockExerciseData} onPlayAudio={onPlayAudio} />);
 
-    expect(screen.getByText('Two notes will play automatically. Listen carefully!')).toBeInTheDocument();
   });
 
   it('handles audio playback errors gracefully', () => {
