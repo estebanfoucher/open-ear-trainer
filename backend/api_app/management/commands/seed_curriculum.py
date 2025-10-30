@@ -165,30 +165,21 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson3_1.title}"))
-        # Ensure theory content for intervals basic lesson
-        if not (lesson3_1.theory_title or lesson3_1.theory_markdown):
-            lesson3_1.theory_title = "Intervals 101"
-            lesson3_1.theory_markdown = (
-                "# Intervals 101\n\n"
-                "An interval is the distance between two notes. In the major scale, the degrees are: "
-                "1 (Do), 2 (Re), 3 (Mi), 4 (Fa), 5 (Sol), 6 (La), 7 (Ti).\n\n"
-                "Key definitions:\n\n"
-                "- Minor Third (m3): three semitones (e.g., C → Eb)\n"
-                "- Major Third (M3): four semitones (e.g., C → E)\n"
-                "- Perfect Fourth (P4): five semitones (e.g., C → F)\n"
-                "- Perfect Fifth (P5): seven semitones (e.g., C → G)\n\n"
-                "You'll now practice identifying these intervals."
-            )
-            lesson3_1.save(update_fields=["theory_title", "theory_markdown"])
+        # Set theory content for intervals basic lesson from external module
+        from theories.theory_3_1 import theory_3_1
+
+        lesson3_1.theory_title = "Intervals 101"
+        lesson3_1.theory_markdown = theory_3_1
+        lesson3_1.save(update_fields=["theory_title", "theory_markdown"])
 
         # Chapter 4 Lessons
         lesson4_1, created = Lesson.objects.get_or_create(
             chapter=chapter4,
             order=1,
             defaults={
-                "title": "Major vs. Minor Chords",
-                "description": "Learn to distinguish major and minor chord qualities.",
-                "learning_objectives": "Distinguish major from minor, recognize emotional character",
+                "title": "Triad chords ",
+                "description": "Learn to distinguish most common triad chords.",
+                "learning_objectives": "Distinguish major, minor, diminished, augmented, suspended chords",
                 "estimated_minutes": 15,
                 "is_published": True,
             },
@@ -196,47 +187,11 @@ class Command(BaseCommand):
         if created:
             self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson4_1.title}"))
 
-        lesson4_2, created = Lesson.objects.get_or_create(
-            chapter=chapter4,
-            order=2,
-            defaults={
-                "title": "Diminished & Augmented",
-                "description": "Learn to identify all four triad types: major, minor, diminished, and augmented.",
-                "learning_objectives": "Distinguish all triad types, hear tension vs stability",
-                "estimated_minutes": 20,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson4_2.title}"))
+        lesson4_1.theory_title = "Triad chords 101"
+        from theories.theory_4_1 import theory_4_1
 
-        lesson4_3, created = Lesson.objects.get_or_create(
-            chapter=chapter4,
-            order=3,
-            defaults={
-                "title": "Suspended Chords",
-                "description": "Learn to identify suspended chords and distinguish them from major and minor triads.",
-                "learning_objectives": "Recognize suspended chords, distinguish from triads",
-                "estimated_minutes": 20,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson4_3.title}"))
-
-        lesson4_4, created = Lesson.objects.get_or_create(
-            chapter=chapter4,
-            order=4,
-            defaults={
-                "title": "Inversions",
-                "description": "Learn to identify triads in different inversions by their bass note.",
-                "learning_objectives": "Recognize inversions, identify bass influence",
-                "estimated_minutes": 20,
-                "is_published": True,
-            },
-        )
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Created Lesson: {lesson4_4.title}"))
+        lesson4_1.theory_markdown = theory_4_1
+        lesson4_1.save(update_fields=["theory_title", "theory_markdown"])
 
         # Chapter 1 Exercises
         exercise1_1_1, created = Exercise.objects.get_or_create(
@@ -446,9 +401,9 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f"Created Exercise: {exercise4_1_1.title}")
             )
 
-        exercise4_2_1, created = Exercise.objects.get_or_create(
-            lesson=lesson4_2,
-            order=1,
+        exercise4_1_2, created = Exercise.objects.get_or_create(
+            lesson=lesson4_1,
+            order=2,
             defaults={
                 "exercise_type": "triad_fifth_quality",
                 "title": "Fifth Quality",
@@ -460,12 +415,12 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise4_2_1.title}")
+                self.style.SUCCESS(f"Created Exercise: {exercise4_1_2.title}")
             )
 
-        exercise4_3_1, created = Exercise.objects.get_or_create(
-            lesson=lesson4_3,
-            order=1,
+        exercise4_1_3, created = Exercise.objects.get_or_create(
+            lesson=lesson4_1,
+            order=3,
             defaults={
                 "exercise_type": "suspended_chords",
                 "title": "Suspended Chord Exercise",
@@ -477,25 +432,7 @@ class Command(BaseCommand):
         )
         if created:
             self.stdout.write(
-                self.style.SUCCESS(f"Created Exercise: {exercise4_3_1.title}")
+                self.style.SUCCESS(f"Created Exercise: {exercise4_1_3.title}")
             )
-
-        # TODO: Add identify_bass_note exercise to registry when implemented
-        # exercise4_4_1, created = Exercise.objects.get_or_create(
-        #     lesson=lesson4_4,
-        #     order=1,
-        #     defaults={
-        #         "exercise_type": "identify_bass_note",
-        #         "title": "Identify Bass Note",
-        #         "description": "Listen to a triad in inversion and identify which note is in the bass (lowest).",
-        #         "difficulty_level": 3,
-        #         "config": {},
-        #         "is_published": True,
-        #     },
-        # )
-        # if created:
-        #     self.stdout.write(
-        #         self.style.SUCCESS(f"Created Exercise: {exercise4_4_1.title}")
-        #     )
 
         self.stdout.write(self.style.SUCCESS("Successfully seeded curriculum data!"))

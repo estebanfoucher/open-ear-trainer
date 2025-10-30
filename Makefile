@@ -1,4 +1,4 @@
-.PHONY: help install setup run run-backend run-frontend test lint format migrate clean
+.PHONY: help install setup run run-backend run-frontend stop-backend stop-frontend stop test lint format migrate clean
 
 # Default target
 help: ## Show this help message
@@ -40,6 +40,30 @@ run-backend:
 
 run-frontend: ## Run React development server
 	cd frontend && npm start
+
+# Stop dev servers
+stop-backend: ## Stop backend dev server on port 8000
+	@pids=`lsof -ti :8000 2>/dev/null`; \
+	if [ -n "$$pids" ]; then \
+		echo "Killing backend (port 8000): $$pids"; \
+		kill -9 $$pids || true; \
+	else \
+		echo "No backend process found on port 8000"; \
+	fi
+
+stop-frontend: ## Stop frontend dev server on port 3000
+	@pids=`lsof -ti :3000 2>/dev/null`; \
+	if [ -n "$$pids" ]; then \
+		echo "Killing frontend (port 3000): $$pids"; \
+		kill -9 $$pids || true; \
+	else \
+		echo "No frontend process found on port 3000"; \
+	fi
+
+stop: stop-backend stop-frontend ## Stop backend and frontend servers
+
+seed: ## Seed development curriculum data
+	source .venv/bin/activate && cd backend && DJANGO_SETTINGS_MODULE=config.settings.development python manage.py seed_curriculum
 
 # Code quality
 lint: ## Run ruff linting

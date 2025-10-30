@@ -4,6 +4,7 @@ import './App.css';
 import ChapterList from './components/ChapterList';
 import LessonList from './components/LessonList';
 import ExerciseList from './components/ExerciseList';
+import { renderMarkdown } from './utils/markdown';
 
 interface Exercise {
   id: string;
@@ -187,7 +188,7 @@ const App: React.FC = () => {
       // Mark specific chapters as maintenance
       const chaptersWithMaintenance = response.data.map((chapter: Chapter) => ({
         ...chapter,
-        is_maintenance: chapter.id === 1 || chapter.id === 2 // Direction & Contour, Tonal Center & Scale Sense
+        is_maintenance: chapter.id === 1 || chapter.id === 2
       }));
 
       setChapters(chaptersWithMaintenance);
@@ -415,7 +416,7 @@ const App: React.FC = () => {
           </button>
           <h2>{(selectedLesson as any).theory_title || 'Theory'}</h2>
           {(selectedLesson as any).theory_markdown ? (
-            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{(selectedLesson as any).theory_markdown}</pre>
+            <div dangerouslySetInnerHTML={{ __html: renderMarkdown((selectedLesson as any).theory_markdown) }} />
           ) : (
             <p>No theory content available.</p>
           )}
